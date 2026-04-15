@@ -5,7 +5,7 @@ contributors:
   - https://github.com/icaraps 
 ---
 
-<Superhero slots="heading, text" background="rgb(194, 158, 29)"/>
+<Superhero slots="heading, text" background="rgb(194, 100, 29)"/>
 
 # Adobe Brand Intelligence
 
