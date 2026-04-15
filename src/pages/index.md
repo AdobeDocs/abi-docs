@@ -1,8 +1,8 @@
 ---
-title: Overview - Analytics
-description: This is the overview page of Analytics
+title: Overview - Brand Intelligence  
+description: This is the overview page of Brand Intelligence
 contributors:
-  - https://github.com/icaraps 
+  - https://github.com/Aeabreu-hub
 ---
 
 <Superhero slots="heading, text" background="rgb(194, 100, 29)"/>
