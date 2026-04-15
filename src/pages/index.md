@@ -5,16 +5,19 @@ contributors:
   - https://github.com/icaraps 
 ---
 
-<Superhero slots="heading, text"/>
+<Superhero slots="heading, text" background="rgb(194, 158, 29)"/>
 
 # Adobe Brand Intelligence
 
-Adobe Brand Intelligence System(ABIS) is a standalone offering that enables
+Explore the API documentation for Adobe Brand Intelligence
 
-* enterprises to capture both explicit and implicit brand guidelines
-* validate how the brand shows up across channels
-* and instruct automated assembly using creative apps
-* predict engagement before activation
+## Overview
+
+Adobe Brand Intelligence System(ABIS) is a standalone offering that enables Enterprises to capture both explicit and implicit brand guidelines. Use this service to:
+
+* Validate how the brand shows up across channels.
+* Instruct automated assembly using creative apps.
+* Predict engagement before activation.
 
 ## Base URLs
 
@@ -26,10 +29,10 @@ Adobe Brand Intelligence System(ABIS) is a standalone offering that enables
 
 ## Authentication
 
-API key, IMS token.
+The service is authenticated using API key, IMS token.
 
-* **FDE Interface**: protected by Service Token
-* **Skill Interface**: protected by IMS User Token
+* **FDE Interface**: Protected by Service Token.
+* **Skill Interface**: Protected by IMS User Token.
 
 ## APIs
 
