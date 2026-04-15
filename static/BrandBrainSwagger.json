@@ -1,0 +1,3132 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BB Cortex",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://bb-cortex.adobe.io",
+      "description": "production"
+    }
+  ],
+  "paths": {
+    "/api/v1/review-and-approve": {
+      "get": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "List bulk validation jobs",
+        "description": "Returns a paginated list of bulk validation jobs for the authenticated tenant. Results are scoped to the tenant resolved from the `Authorization` bearer token.\n\nUse `cursor` from `nextCursor` in the response to retrieve subsequent pages. Results are sorted by `created_time` descending (newest first) by default.",
+        "operationId": "list_bulk_validate_jobs_api_v1_review_and_approve_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scope filter. One of `\"all\"`, `\"current-user\"`, `\"current-org\"`. Defaults to `\"all\"`.",
+              "title": "Scope"
+            },
+            "description": "Scope filter. One of `\"all\"`, `\"current-user\"`, `\"current-org\"`. Defaults to `\"all\"`."
+          },
+          {
+            "name": "campaignId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter to jobs with this campaign ID.",
+              "title": "Campaignid"
+            },
+            "description": "Filter to jobs with this campaign ID."
+          },
+          {
+            "name": "batchName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Case-insensitive substring search on batch name.",
+              "title": "Batchname"
+            },
+            "description": "Case-insensitive substring search on batch name."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by job status. One of `not_started`, `running`, `canceling`, `succeeded`, `partially_succeeded`, `failed`, `canceled`.",
+              "title": "Status"
+            },
+            "description": "Filter by job status. One of `not_started`, `running`, `canceling`, `succeeded`, `partially_succeeded`, `failed`, `canceled`."
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort field. One of `\"created_time\"` (default), `\"updated_time\"`.",
+              "title": "Sortby"
+            },
+            "description": "Sort field. One of `\"created_time\"` (default), `\"updated_time\"`."
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort direction. One of `\"desc\"` (default, newest first), `\"asc\"`.",
+              "title": "Sortorder"
+            },
+            "description": "Sort direction. One of `\"desc\"` (default, newest first), `\"asc\"`."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque pagination cursor from the previous response `nextCursor`. Omit for the first page.",
+              "title": "Cursor"
+            },
+            "description": "Opaque pagination cursor from the previous response `nextCursor`. Omit for the first page."
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Number of jobs per page. Range 1\u2013100, default 20.",
+              "title": "Pagesize"
+            },
+            "description": "Number of jobs per page. Range 1\u2013100, default 20."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkJobsPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      },
+      "post": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Submit a batch of assets for brand compliance validation",
+        "description": "Enqueues a bulk brand compliance validation job for the authenticated tenant. The tenant is resolved from the `Authorization` bearer token \u2014 callers do not supply a tenant ID directly.\n\nReturns submission accounting (`submittedCount`, `acceptedCount`, `rejectedCount`). Use the `statusUrl` or `GET /api/v1/review-and-approve/{job_id}` to poll for progress, and `GET /api/v1/review-and-approve/{job_id}/items` for per-asset results.",
+        "operationId": "submit_bulk_validate_api_v1_review_and_approve_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkValidateSubmitResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body failed validation (e.g. missing required field).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}": {
+      "get": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Poll the status of a bulk validation job",
+        "description": "Returns the current status of a bulk validation job, including per-state item counts (`counts`, `succeededCount`, `failedCount`, `pendingCount`). The tenant resolved from `Authorization` must match the submitting tenant.\n\nFetch individual asset results from `GET /api/v1/review-and-approve/{job_id}/items`.",
+        "operationId": "poll_bulk_validate_api_v1_review_and_approve__job_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkValidateJobResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unknown batch job ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}/items": {
+      "get": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Fetch per-asset validation results for a bulk job",
+        "description": "Returns validation results for individual assets within a bulk job. While the batch is still running, only assets that have reached a terminal state (`SUCCEEDED` or `FAILED`) are included \u2014 poll again as `pendingCount` decreases. Once the batch is complete, all submitted assets are present.\n\nEach item contains `validationErrors` and `validationSummary` on `SUCCEEDED`, or a `message` on `FAILED`.",
+        "operationId": "poll_bulk_validate_items_api_v1_review_and_approve__job_id__items_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkValidateItemsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or unknown batch job ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}/items/{item_id}": {
+      "get": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Fetch the detail record for a single item in a bulk validation job",
+        "description": "Returns the full detail record for one asset within a bulk validation job, including processing diagnostics (`storageValidation`, `attemptCount`, `attempts`), the `effectiveContext` applied to this specific item, and the structured `error` object on FAILED or `result` on SUCCEEDED.\n\nUse `GET /api/v1/review-and-approve/{job_id}/items` to list all items and identify their `itemId`s.",
+        "operationId": "get_bulk_validate_item_api_v1_review_and_approve__job_id__items__item_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkItemDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid job ID or item ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found within the specified job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}/cancel": {
+      "put": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Cancel a bulk validation job",
+        "description": "Request cancellation of a bulk validation job. In-flight items are allowed to complete; newly dispatched items are marked `canceled`. The job transitions to `canceled` once all items reach a terminal state.\n\nCanceling an already-terminal job is a no-op \u2014 the current state is returned unchanged.",
+        "operationId": "cancel_bulk_validate_api_v1_review_and_approve__job_id__cancel_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkValidateJobResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}/items/{item_id}/comments": {
+      "get": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "List validation comments for a bulk item",
+        "description": "Retrieve validation comments for a single succeeded bulk item with cursor-based pagination. Includes pipeline-generated comments (`errorSource: pipeline`) and user-created comments (`errorSource: user`).\n\nUse `cursor` from `nextCursor` in the response to fetch the next page.",
+        "operationId": "list_bulk_item_comments_api_v1_review_and_approve__job_id__items__item_id__comments_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Number of comments per page. Range 1\u2013100, default 20.",
+              "title": "Limit"
+            },
+            "description": "Number of comments per page. Range 1\u2013100, default 20."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque pagination cursor from the previous response `nextCursor`. Omit for the first page.",
+              "title": "Cursor"
+            },
+            "description": "Opaque pagination cursor from the previous response `nextCursor`. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorsPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid cursor format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job or item not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Job has expired and been purged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      },
+      "post": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Add a user-created comment to a bulk item",
+        "description": "Add a human-authored validation comment to a succeeded bulk item. Only `errorSummary` (and optional `userName`) are accepted \u2014 attributions, regions, and tags are reserved for pipeline-generated comments. The new comment is returned with `errorSource: user`.",
+        "operationId": "create_bulk_item_comment_api_v1_review_and_approve__job_id__items__item_id__comments_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValidationErrorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job or item not found, or item not yet succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/v1/review-and-approve/{job_id}/items/{item_id}/comments/{comment_id}": {
+      "patch": {
+        "tags": [
+          "Review & Approve"
+        ],
+        "summary": "Update a validation comment on a bulk item",
+        "description": "Apply a feedback action to a validation comment on a bulk item.\n\n**Actions:**\n\n`setAccepted` \u2014 accept or un-accept a comment:\n```json\n{ \"action\": \"setAccepted\", \"accepted\": true }\n```\n\n`setRejected` \u2014 reject or un-reject a comment with optional reason:\n```json\n{ \"action\": \"setRejected\", \"rejected\": true, \"reason\": \"incorrectAssessment\", \"details\": \"...\" }\n```\n\n`editContent` \u2014 update the comment summary and/or remove attribution rows:\n```json\n{ \"action\": \"editContent\", \"errorSummary\": \"Updated description\", \"removeCorpusAttributionIds\": [] }\n```\n\n`setAccepted` and `setRejected` are mutually exclusive.",
+        "operationId": "update_bulk_item_comment_api_v1_review_and_approve__job_id__items__item_id__comments__comment_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "comment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EditContentAction"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SetAcceptedAction"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SetRejectedAction"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Authorization token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Tenant not found or caller not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job, item, or comment not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violation (mutual exclusivity, no-op edit, etc.).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivationContextItem": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "activation_context",
+            "title": "Type"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Activation context value forwarded to the validation engine."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "ActivationContextItem"
+      },
+      "AttributionElement": {
+        "properties": {
+          "attributionId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attributionid",
+            "description": "System-assigned identifier for this attribution.",
+            "examples": [
+              "7eca9f7e-6d13-4328-a677-947c592c3b18"
+            ]
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid",
+            "description": "Identifier of the source document or asset.",
+            "examples": [
+              "EY_Logo_Beam_RGB_White_Yellow.png"
+            ]
+          },
+          "documentUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documenturl",
+            "description": "Signed URL for accessing the source document.",
+            "examples": [
+              "https://example.com/signed-doc.pdf"
+            ]
+          },
+          "chunkUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunkurl",
+            "description": "Signed URL for the specific chunk within the document, if applicable."
+          },
+          "regions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Region"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regions",
+            "description": "Regions within the document that support this attribution. Empty list when no specific region applies."
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Open-ended; \"page\" expected for multi-page documents.",
+            "examples": [
+              {
+                "page": 1
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "documentId"
+        ],
+        "title": "AttributionElement"
+      },
+      "BoundingBox": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X",
+            "examples": [
+              0.1
+            ]
+          },
+          "y": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y",
+            "examples": [
+              0.2
+            ]
+          },
+          "width": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Width",
+            "examples": [
+              0.5
+            ]
+          },
+          "height": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Height",
+            "examples": [
+              0.3
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "BoundingBox"
+      },
+      "BrandValidationError": {
+        "properties": {
+          "errorId": {
+            "type": "string",
+            "title": "Errorid",
+            "examples": [
+              "e1a2b3c4-0000-0000-0000-000000000001"
+            ]
+          },
+          "errorSummary": {
+            "type": "string",
+            "title": "Errorsummary",
+            "description": "Human-readable description for UI display.",
+            "examples": [
+              "Logo clear space violation detected."
+            ]
+          },
+          "assetAttributions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AttributionElement"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assetattributions"
+          },
+          "corpusAttributions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AttributionElement"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corpusattributions"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Open-ended key-value pairs, e.g. severity or focus area.",
+            "examples": [
+              {
+                "focusArea": "logo",
+                "guidelineSection": "branding",
+                "severity": "high"
+              }
+            ]
+          },
+          "accepted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted",
+            "description": "Whether a reviewer has accepted (acknowledged) this violation."
+          },
+          "rejected": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejected",
+            "description": "Whether a reviewer has rejected (disputed) this violation."
+          },
+          "rejectionReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectionreason",
+            "description": "Free-text reason provided when the violation was rejected."
+          },
+          "rejectionDetails": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectiondetails",
+            "description": "Structured rejection metadata. Shape determined by brand-brain."
+          },
+          "errorSource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorsource",
+            "description": "Service or model component that produced this violation."
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "Display name of the reviewer who last acted on this violation."
+          },
+          "imsUserId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imsuserid",
+            "description": "IMS user ID of the reviewer who last acted on this violation."
+          }
+        },
+        "type": "object",
+        "required": [
+          "errorId",
+          "errorSummary"
+        ],
+        "title": "BrandValidationError"
+      },
+      "BulkItemDetailResponse": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Jobid",
+            "description": "The parent bulk job ID.",
+            "examples": [
+              "9af61d67-39a3-447d-8405-ab43e8db8d2f"
+            ]
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid",
+            "description": "System-assigned identifier for this item.",
+            "examples": [
+              "24982863-42f7-42d6-8666-83c5cd0924fd"
+            ]
+          },
+          "clientItemId": {
+            "type": "string",
+            "title": "Clientitemid",
+            "description": "Caller-assigned identifier echoed from the submission.",
+            "examples": [
+              "img-20260408_1_2"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ValidationStatus",
+            "examples": [
+              "FAILED"
+            ]
+          },
+          "asset": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidateAsset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Asset details echoed from the submission."
+          },
+          "effectiveContext": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FocusAreaContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ActivationContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataContextItem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "activation_context": "#/components/schemas/ActivationContextItem",
+                      "focus_area": "#/components/schemas/FocusAreaContextItem",
+                      "metadata": "#/components/schemas/MetadataContextItem"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effectivecontext",
+            "description": "Merged context applied to this item \u2014 combines batch-level context with any per-asset overrides."
+          },
+          "latestChildJobId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latestchildjobid",
+            "description": "ID of the most recent single-validate job spawned for this item, if any."
+          },
+          "attemptCount": {
+            "type": "integer",
+            "title": "Attemptcount",
+            "description": "Number of processing attempts made so far.",
+            "default": 0,
+            "examples": [
+              0
+            ]
+          },
+          "storageValidation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageValidation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Result of the pre-processing storage reachability check."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkItemError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Populated on FAILED. Null when the item succeeded or is still processing."
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkItemValidationResult"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Populated on SUCCEEDED. Contains validation summary and error list."
+          },
+          "thumbnailUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnailurl",
+            "description": "Presigned URL for a thumbnail preview of the asset. Populated on SUCCEEDED.",
+            "examples": [
+              "https://example.com/signed/thumbnail.png"
+            ]
+          },
+          "attempts": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempts",
+            "description": "Ordered list of processing attempt records. Shape is determined by brand-brain and may evolve."
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "itemId",
+          "clientItemId",
+          "status"
+        ],
+        "title": "BulkItemDetailResponse",
+        "description": "Full detail record for a single asset within a bulk validation job.\n\nReturned by ``GET /api/v1/bulk-validate-assets/{job_id}/items/{item_id}``."
+      },
+      "BulkItemError": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Broad error category (e.g. downstream_validation_failure, internal_error).",
+            "examples": [
+              "downstream_validation_failure"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Machine-readable error code for programmatic handling.",
+            "examples": [
+              "download_failed"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable detail. May be empty string.",
+            "default": "",
+            "examples": [
+              "Asset URL has expired."
+            ]
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable",
+            "description": "Whether submitting the same asset again may succeed.",
+            "examples": [
+              false
+            ]
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Service component that produced the error.",
+            "examples": [
+              "bulk-validation-api"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "code",
+          "retryable",
+          "source"
+        ],
+        "title": "BulkItemError",
+        "description": "Structured error returned when an individual asset fails processing."
+      },
+      "BulkItemResult": {
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid",
+            "examples": [
+              "04096c40-45d9-41cf-8ea8-a4f5342d821c"
+            ]
+          },
+          "clientItemId": {
+            "type": "string",
+            "title": "Clientitemid",
+            "description": "Caller-assigned identifier echoed from the submission.",
+            "examples": [
+              "img-20260408_1_2"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ValidationStatus",
+            "examples": [
+              "POLLING"
+            ]
+          },
+          "assetName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assetname",
+            "description": "Asset file name echoed from the submission.",
+            "examples": [
+              "EY_Logo_Beam_RGB-OffBlack-Yellow.png"
+            ]
+          },
+          "effectiveContext": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FocusAreaContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ActivationContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataContextItem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "activation_context": "#/components/schemas/ActivationContextItem",
+                      "focus_area": "#/components/schemas/FocusAreaContextItem",
+                      "metadata": "#/components/schemas/MetadataContextItem"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effectivecontext",
+            "description": "Merged context applied to this item \u2014 combines batch-level context with any per-asset overrides."
+          },
+          "latestChildJobId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latestchildjobid",
+            "description": "ID of the most recent single-validate job spawned for this item, if any."
+          },
+          "attemptCount": {
+            "type": "integer",
+            "title": "Attemptcount",
+            "description": "Number of processing attempts made so far.",
+            "default": 0,
+            "examples": [
+              0
+            ]
+          },
+          "storageValidation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageValidation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pre-processing storage reachability check result."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkItemError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Structured error object. Populated on FAILED, null otherwise."
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkItemValidationResult"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Validation outcome. Populated on SUCCEEDED, null otherwise."
+          },
+          "errorCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorcode",
+            "description": "Flat error code. Convenience duplicate of error.code when error is set.",
+            "examples": [
+              "download_failed"
+            ]
+          },
+          "errorMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errormessage",
+            "description": "Flat error message. Convenience duplicate of error.message when error is set.",
+            "examples": [
+              "Asset URL has expired."
+            ]
+          },
+          "validationSummary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Populated on SUCCEEDED."
+          },
+          "validationErrors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BrandValidationError"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validationerrors",
+            "description": "Populated on SUCCEEDED. Empty list means no violations found."
+          },
+          "thumbnailUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnailurl",
+            "description": "Presigned URL for a thumbnail preview of the asset. Populated on SUCCEEDED.",
+            "examples": [
+              "https://example.com/signed/thumbnail.png"
+            ]
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Open-ended key-value pairs attached to this item by brand-brain."
+          }
+        },
+        "type": "object",
+        "required": [
+          "itemId",
+          "clientItemId",
+          "status"
+        ],
+        "title": "BulkItemResult",
+        "description": "Summary record for a single asset within a bulk job.\n\nReturned as elements of the ``items`` list from\n``GET /api/v1/bulk-validate-assets/{job_id}/items``.\nItems in non-terminal states (e.g. POLLING) are included while the batch\nis still running; poll again as ``pendingCount`` decreases."
+      },
+      "BulkItemValidationResult": {
+        "properties": {
+          "validationSummary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "High-level narrative summary of the validation outcome."
+          },
+          "validationErrors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BrandValidationError"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validationerrors",
+            "description": "List of specific brand guideline violations. Empty list means compliant."
+          }
+        },
+        "type": "object",
+        "title": "BulkItemValidationResult",
+        "description": "Validation outcome embedded in ``result`` when an item reaches SUCCEEDED.\n\nMirrors the result fields from a single-asset validate poll."
+      },
+      "BulkJobStatus": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "running",
+          "canceling",
+          "succeeded",
+          "partially_succeeded",
+          "failed",
+          "canceled"
+        ],
+        "title": "BulkJobStatus"
+      },
+      "BulkJobsPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BulkValidateJobResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Jobs for this page, ordered by the requested sort field."
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor",
+            "description": "Opaque pagination cursor. Pass as ``cursor`` on the next request to retrieve the following page. Null when this is the last page."
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total",
+            "description": "Total number of jobs matching the filter. May be null."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "BulkJobsPage",
+        "description": "Response from ``GET /api/v1/bulk-validate-assets/``."
+      },
+      "BulkValidateAssetItem": {
+        "properties": {
+          "clientItemId": {
+            "type": "string",
+            "title": "Clientitemid",
+            "description": "Caller-assigned identifier for this asset; echoed back in results.",
+            "examples": [
+              "img-20260408_1_1"
+            ]
+          },
+          "context": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FocusAreaContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ActivationContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataContextItem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "activation_context": "#/components/schemas/ActivationContextItem",
+                      "focus_area": "#/components/schemas/FocusAreaContextItem",
+                      "metadata": "#/components/schemas/MetadataContextItem"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Per-asset context items applied in addition to (and overriding) any batch-level context."
+          },
+          "asset": {
+            "$ref": "#/components/schemas/ValidateAsset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "clientItemId",
+          "asset"
+        ],
+        "title": "BulkValidateAssetItem",
+        "description": "A single asset entry inside a bulk validation request."
+      },
+      "BulkValidateCounts": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "examples": [
+              2
+            ]
+          },
+          "accepted": {
+            "type": "integer",
+            "title": "Accepted",
+            "description": "Items accepted into the queue.",
+            "examples": [
+              2
+            ]
+          },
+          "rejected": {
+            "type": "integer",
+            "title": "Rejected",
+            "description": "Items rejected before queueing.",
+            "examples": [
+              0
+            ]
+          },
+          "waiting": {
+            "type": "integer",
+            "title": "Waiting",
+            "examples": [
+              0
+            ]
+          },
+          "running": {
+            "type": "integer",
+            "title": "Running",
+            "examples": [
+              2
+            ]
+          },
+          "succeeded": {
+            "type": "integer",
+            "title": "Succeeded",
+            "examples": [
+              0
+            ]
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "examples": [
+              0
+            ]
+          },
+          "canceled": {
+            "type": "integer",
+            "title": "Canceled",
+            "examples": [
+              0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "accepted",
+          "rejected",
+          "waiting",
+          "running",
+          "succeeded",
+          "failed",
+          "canceled"
+        ],
+        "title": "BulkValidateCounts",
+        "description": "Per-state item counts returned while polling a bulk validation job."
+      },
+      "BulkValidateFailureSummary": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of failed items.",
+            "examples": [
+              3
+            ]
+          },
+          "byErrorCode": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Byerrorcode",
+            "description": "Count of failed items grouped by error code.",
+            "examples": [
+              {
+                "download_failed": 3
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "total"
+        ],
+        "title": "BulkValidateFailureSummary",
+        "description": "Breakdown of item failures when a bulk validation batch fails."
+      },
+      "BulkValidateItemsResponse": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Jobid",
+            "description": "The parent bulk job ID.",
+            "examples": [
+              "ff68b036-8271-4f2b-8567-8f7a85e04cad"
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BulkItemResult"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Item records for this page. Includes items in all states \u2014 non-terminal items (e.g. POLLING) are present while the batch is running."
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor",
+            "description": "Opaque pagination cursor. Pass as a query parameter on the next request to retrieve the following page. Null when this is the last page."
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total",
+            "description": "Total number of items in the job. May be null until fully known.",
+            "examples": [
+              2
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "items"
+        ],
+        "title": "BulkValidateItemsResponse",
+        "description": "Response from ``GET /api/v1/bulk-validate-assets/{job_id}/items``."
+      },
+      "BulkValidateJobResponse": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Jobid",
+            "examples": [
+              "ff68b036-8271-4f2b-8567-8f7a85e04cad"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkJobStatus",
+            "examples": [
+              "succeeded"
+            ]
+          },
+          "totalItems": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Totalitems",
+            "examples": [
+              2
+            ]
+          },
+          "createdTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdtime",
+            "examples": [
+              "2026-04-07T22:47:22Z"
+            ]
+          },
+          "updatedTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatedtime",
+            "examples": [
+              "2026-04-07T22:47:22Z"
+            ]
+          },
+          "statusUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statusurl",
+            "description": "Canonical URL to poll this job's status.",
+            "examples": [
+              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+            ]
+          },
+          "cancelUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelurl",
+            "description": "URL to cancel this batch job.",
+            "examples": [
+              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+            ]
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenantid",
+            "description": "Echoed from the resolved tenant.",
+            "examples": [
+              "72604644-649a-4549-ba46-82dd7afda00a"
+            ]
+          },
+          "createdByUserId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdbyuserid",
+            "examples": [
+              "78FF48815CD449DA0A494219@c62f24cc5b5b7e0e0a494004"
+            ]
+          },
+          "campaignId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaignid",
+            "examples": [
+              "camp_2026_spring"
+            ]
+          },
+          "batchName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batchname",
+            "examples": [
+              "shabib_ey_20260408_3"
+            ]
+          },
+          "context": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FocusAreaContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ActivationContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataContextItem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "activation_context": "#/components/schemas/ActivationContextItem",
+                      "focus_area": "#/components/schemas/FocusAreaContextItem",
+                      "metadata": "#/components/schemas/MetadataContextItem"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Batch-level context echoed from the submission."
+          },
+          "counts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkValidateCounts"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-state item counts."
+          },
+          "succeededCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeededcount",
+            "examples": [
+              0
+            ]
+          },
+          "failedCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failedcount",
+            "examples": [
+              0
+            ]
+          },
+          "canceledCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canceledcount",
+            "examples": [
+              0
+            ]
+          },
+          "pendingCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pendingcount",
+            "description": "Items not yet in a terminal state (waiting + running).",
+            "examples": [
+              2
+            ]
+          },
+          "failureSummary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BulkValidateFailureSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Breakdown of item failures when the batch fails."
+          },
+          "totalPageSummary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TotalPageSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Aggregate page-level processing counts across all assets in the batch."
+          },
+          "retentionPolicy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retentionpolicy",
+            "examples": [
+              "30_days"
+            ]
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiresat",
+            "description": "When brand-brain will purge results for this batch.",
+            "examples": [
+              "2026-05-07T22:47:22Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "status",
+          "createdTime",
+          "updatedTime"
+        ],
+        "title": "BulkValidateJobResponse",
+        "description": "Response returned when polling a bulk validation job status.\n\nThe ``counts`` breakdown and convenience scalars (``succeededCount``,\n``failedCount``, ``pendingCount``) let callers decide whether to keep\npolling without parsing the full ``counts`` object."
+      },
+      "BulkValidateRequest": {
+        "properties": {
+          "campaignId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaignid",
+            "description": "Optional campaign identifier for grouping results.",
+            "examples": [
+              "camp_2026_spring"
+            ]
+          },
+          "batchName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batchname",
+            "description": "Human-readable label for this batch.",
+            "examples": [
+              "shabib_ey_20260408_1"
+            ]
+          },
+          "clientRequestId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clientrequestid",
+            "description": "Idempotency key. Duplicate submissions with the same ID are deduplicated.",
+            "examples": [
+              "shabib_ey_20260408_1"
+            ]
+          },
+          "context": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FocusAreaContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ActivationContextItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataContextItem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "activation_context": "#/components/schemas/ActivationContextItem",
+                      "focus_area": "#/components/schemas/FocusAreaContextItem",
+                      "metadata": "#/components/schemas/MetadataContextItem"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context",
+            "description": "Batch-level context items applied to all assets unless overridden per-asset. Omit to validate all available focus areas."
+          },
+          "retentionPolicy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retentionpolicy",
+            "description": "How long brand-brain should retain results for this batch.",
+            "examples": [
+              "30_days"
+            ]
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/BulkValidateAssetItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Assets",
+            "description": "One or more assets to validate in this batch."
+          }
+        },
+        "type": "object",
+        "required": [
+          "assets"
+        ],
+        "title": "BulkValidateRequest",
+        "description": "Bulk validation request payload.\n\n``tenantId`` is intentionally absent \u2014 bb-cortex resolves it from the\n``Authorization`` bearer token and injects it before forwarding to brand-brain."
+      },
+      "BulkValidateSubmitResponse": {
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Jobid",
+            "examples": [
+              "ff68b036-8271-4f2b-8567-8f7a85e04cad"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ValidationStatus",
+            "examples": [
+              "NOT_STARTED"
+            ]
+          },
+          "totalItems": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Totalitems",
+            "examples": [
+              2
+            ]
+          },
+          "createdTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdtime",
+            "examples": [
+              "2026-04-07T22:47:22Z"
+            ]
+          },
+          "updatedTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatedtime",
+            "examples": [
+              "2026-04-07T22:47:22Z"
+            ]
+          },
+          "statusUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statusurl",
+            "description": "Canonical URL to poll this job's status.",
+            "examples": [
+              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+            ]
+          },
+          "cancelUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelurl",
+            "description": "URL to cancel this batch job.",
+            "examples": [
+              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+            ]
+          },
+          "submittedCount": {
+            "type": "integer",
+            "title": "Submittedcount",
+            "description": "Total number of asset items received in the request.",
+            "examples": [
+              2
+            ]
+          },
+          "acceptedCount": {
+            "type": "integer",
+            "title": "Acceptedcount",
+            "description": "Items accepted into the processing queue.",
+            "examples": [
+              2
+            ]
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "title": "Rejectedcount",
+            "description": "Items rejected before queueing (e.g. schema or size violations).",
+            "examples": [
+              0
+            ]
+          },
+          "rejections": {
+            "items": {},
+            "type": "array",
+            "title": "Rejections",
+            "description": "Details for each rejected item. Empty list when rejectedCount is 0. Shape is determined by brand-brain."
+          }
+        },
+        "type": "object",
+        "required": [
+          "jobId",
+          "status",
+          "createdTime",
+          "updatedTime",
+          "submittedCount",
+          "acceptedCount",
+          "rejectedCount"
+        ],
+        "title": "BulkValidateSubmitResponse",
+        "description": "Response returned immediately after submitting a bulk validation job (202).\n\nContains submission accounting fields that confirm how many items were\naccepted into the queue. Use ``statusUrl`` to start polling."
+      },
+      "CreateValidationErrorRequest": {
+        "properties": {
+          "errorSummary": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Errorsummary",
+            "description": "Human-readable description of the validation finding.",
+            "examples": [
+              "Logo clear space is insufficient on mobile breakpoint."
+            ]
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "Display name of the user creating this comment.",
+            "examples": [
+              "Jane Smith"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "errorSummary"
+        ],
+        "title": "CreateValidationErrorRequest",
+        "description": "Request body for user-created validation comments."
+      },
+      "EditContentAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "editContent",
+            "title": "Action",
+            "default": "editContent"
+          },
+          "errorSummary": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorsummary",
+            "description": "Replacement error summary text (max 1024 characters)."
+          },
+          "removeCorpusAttributionIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Removecorpusattributionids",
+            "description": "IDs of corpus attribution rows to remove."
+          },
+          "removeAssetAttributionIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Removeassetattributionids",
+            "description": "IDs of asset attribution rows to remove."
+          }
+        },
+        "type": "object",
+        "title": "EditContentAction",
+        "description": "Update a comment's summary text and/or remove specific attribution rows."
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Human-readable error message.",
+            "examples": [
+              "Invalid validation job ID: asdsa"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse"
+      },
+      "FocusArea": {
+        "type": "string",
+        "enum": [
+          "logo",
+          "color",
+          "typography",
+          "layout",
+          "imagery",
+          "messaging",
+          "compliance"
+        ],
+        "title": "FocusArea"
+      },
+      "FocusAreaContextItem": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "focus_area",
+            "title": "Type"
+          },
+          "value": {
+            "$ref": "#/components/schemas/FocusArea",
+            "description": "Brand dimension to scope validation to.",
+            "examples": [
+              "logo"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "title": "FocusAreaContextItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MetadataContextItem": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "metadata",
+            "title": "Type"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata",
+            "description": "Arbitrary key-value pairs forwarded to the validation engine.",
+            "examples": [
+              {
+                "audience": "Enterprise",
+                "channel": "email"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "metadata"
+        ],
+        "title": "MetadataContextItem"
+      },
+      "Pointer": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "title": "X",
+            "examples": [
+              0.05
+            ]
+          },
+          "y": {
+            "type": "number",
+            "title": "Y",
+            "examples": [
+              0.75
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "Pointer",
+        "description": "Normalised (0\u20131) point coordinate within an asset."
+      },
+      "Region": {
+        "properties": {
+          "regionType": {
+            "type": "string",
+            "title": "Regiontype",
+            "description": "\"boundingBox\" | \"mask\" | \"pointer\"",
+            "examples": [
+              "boundingBox"
+            ]
+          },
+          "boundingBox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBox"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Populated when regionType is boundingBox, null otherwise."
+          },
+          "pointer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pointer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Centroid of the region in normalised coordinates. May accompany a boundingBox."
+          }
+        },
+        "type": "object",
+        "required": [
+          "regionType"
+        ],
+        "title": "Region"
+      },
+      "RequestErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error type.",
+            "examples": [
+              "ValidationError"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable description of what was wrong with the request.",
+            "examples": [
+              "1 validation error for ValidateAssetRequest\ntenantId\n  Field required"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "error",
+          "message"
+        ],
+        "title": "RequestErrorResponse"
+      },
+      "SetAcceptedAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "setAccepted",
+            "title": "Action",
+            "default": "setAccepted"
+          },
+          "accepted": {
+            "type": "boolean",
+            "title": "Accepted",
+            "description": "Whether the comment is marked as accepted."
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted"
+        ],
+        "title": "SetAcceptedAction",
+        "description": "Accept or un-accept a validation comment."
+      },
+      "SetRejectedAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "setRejected",
+            "title": "Action",
+            "default": "setRejected"
+          },
+          "rejected": {
+            "type": "boolean",
+            "title": "Rejected",
+            "description": "Whether the comment is marked as rejected.",
+            "default": true
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "description": "Predefined rejection reason. One of 'incorrectAssessment', 'notApplicable', 'outOfScope'.",
+            "examples": [
+              "incorrectAssessment"
+            ]
+          },
+          "details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details",
+            "description": "Free-text rejection details."
+          }
+        },
+        "type": "object",
+        "title": "SetRejectedAction",
+        "description": "Reject or un-reject a validation comment with an optional predefined reason."
+      },
+      "StorageValidation": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "One of \"not_evaluated\", \"passed\", or \"failed\".",
+            "examples": [
+              "not_evaluated"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "StorageValidation",
+        "description": "Pre-processing storage reachability check result."
+      },
+      "TotalPageSummary": {
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "title": "Totalpages",
+            "description": "Total number of pages across all assets in the batch.",
+            "examples": [
+              10
+            ]
+          },
+          "pagesSucceeded": {
+            "type": "integer",
+            "title": "Pagessucceeded",
+            "description": "Pages that completed validation successfully.",
+            "examples": [
+              8
+            ]
+          },
+          "pagesFailed": {
+            "type": "integer",
+            "title": "Pagesfailed",
+            "description": "Pages that failed validation.",
+            "examples": [
+              2
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "totalPages",
+          "pagesSucceeded",
+          "pagesFailed"
+        ],
+        "title": "TotalPageSummary",
+        "description": "Aggregate page-level processing counts for a bulk validation job."
+      },
+      "ValidateAsset": {
+        "properties": {
+          "mediaType": {
+            "type": "string",
+            "title": "Mediatype",
+            "description": "MIME type of the asset.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "sourceType": {
+            "type": "string",
+            "title": "Sourcetype",
+            "default": "url",
+            "examples": [
+              "url"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Presigned or publicly accessible URL of the asset.",
+            "examples": [
+              "https://example.com/logo.png"
+            ]
+          },
+          "assetName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assetname",
+            "description": "Human-readable file name.",
+            "examples": [
+              "EY_Logo_Beam_RGB_White_Yellow.png"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "mediaType",
+          "value"
+        ],
+        "title": "ValidateAsset"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ValidationErrorsPage": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/BrandValidationError"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Validation comments for this page."
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor",
+            "description": "Opaque cursor for the next page. Null when this is the last page."
+          }
+        },
+        "type": "object",
+        "title": "ValidationErrorsPage",
+        "description": "Paginated list of validation comments (errors) for a completed job or bulk item."
+      },
+      "ValidationStatus": {
+        "type": "string",
+        "enum": [
+          "NOT_STARTED",
+          "WAITING",
+          "PROCESSING",
+          "POLLING",
+          "RUNNING",
+          "SUCCEEDED",
+          "FAILED"
+        ],
+        "title": "ValidationStatus"
+      },
+      "ValidationSummary": {
+        "properties": {
+          "summaryText": {
+            "type": "string",
+            "title": "Summarytext",
+            "examples": [
+              "The asset violates 2 brand guidelines."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "summaryText"
+        ],
+        "title": "ValidationSummary"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "IMS Bearer token. Enter the raw token \u2014 'Bearer' prefix is added automatically.",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
