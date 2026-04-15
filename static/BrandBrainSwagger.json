@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "BB Cortex",
+    "title": "Adobe Brand Intelligence",
     "version": "0.1.0"
   },
   "servers": [
@@ -378,7 +378,7 @@
           "Review & Approve"
         ],
         "summary": "Fetch per-asset validation results for a bulk job",
-        "description": "Returns validation results for individual assets within a bulk job. While the batch is still running, only assets that have reached a terminal state (`SUCCEEDED` or `FAILED`) are included \u2014 poll again as `pendingCount` decreases. Once the batch is complete, all submitted assets are present.\n\nEach item contains `validationErrors` and `validationSummary` on `SUCCEEDED`, or a `message` on `FAILED`.",
+        "description": "Returns validation results for individual assets within a bulk job. While the batch is still running, only assets that have reached a terminal state (`SUCCEEDED` or `FAILED`) are included \u2014 poll again as `pendingCount` decreases. Once the batch is complete, all submitted assets are present.\n\nEach item contains `validationErrors` and `validationSummary` on `SUCCEEDED`, or a `message` on `FAILED`.\n\nUse `hasErrors=true` to return only succeeded items with validation errors, or `hasErrors=false` to return only succeeded items with no errors. Omit to return all items regardless of error state.",
         "operationId": "poll_bulk_validate_items_api_v1_review_and_approve__job_id__items_get",
         "security": [
           {
@@ -394,6 +394,24 @@
               "type": "string",
               "title": "Job Id"
             }
+          },
+          {
+            "name": "hasErrors",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter succeeded items by error presence. `true` \u2192 items with errors only; `false` \u2192 items without errors only. Non-succeeded items are unaffected by this filter.",
+              "title": "Haserrors"
+            },
+            "description": "Filter succeeded items by error presence. `true` \u2192 items with errors only; `false` \u2192 items without errors only. Non-succeeded items are unaffected by this filter."
           }
         ],
         "responses": {
@@ -1941,6 +1959,30 @@
             "examples": [
               0
             ]
+          },
+          "succeededWithErrors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeededwitherrors",
+            "description": "Succeeded items that have at least one validation error. Populated only on the single-job GET response; null on list responses."
+          },
+          "succeededWithoutErrors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeededwithouterrors",
+            "description": "Succeeded items with no validation errors. Populated only on the single-job GET response; null on list responses."
           },
           "failed": {
             "type": "integer",
