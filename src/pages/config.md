@@ -1,5 +1,5 @@
 - pathPrefix:
-    - /dev-docs-template/
+    - /adobe-brand-intelligence/
 
 - pages:
     - [Analytics](index.md)
