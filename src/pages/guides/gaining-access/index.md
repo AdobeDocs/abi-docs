@@ -5,12 +5,9 @@ description: How to gain access to APIs
 
 # Authenticate and access Brand Intelligence APIs
 
-This document provides a step-by-step tutorial in order to make calls to Adobe Brand Intelligence APIs. At the end of this tutorial, you will have generated or collected the following credentials that are required as headers in all Brand Intelligence API calls:
+This document provides a step-by-step tutorial for making calls to Adobe Brand Intelligence APIs. At the end of this tutorial, you will have an `{ACCESS_TOKEN}` to authenticate all Brand Intelligence API requests.
 
-- `{ACCESS_TOKEN}`
-- `{API_KEY}`
-
-To maintain the security of your applications and users, all requests to Brand Intelligence APIs must be authenticated and authorized using standards such as OAuth. You can gather most of the required credentials in the initial one-time setup. The access token, however, must be refreshed every 24-hours.
+Brand Intelligence uses OAuth Server-to-Server credentials issued through Adobe Developer Console. All requests require an IMS Bearer token in the `Authorization` header. Tokens are valid for 24 hours and must be refreshed before expiry.
 
 ## Prerequisites
 
@@ -27,9 +24,9 @@ See the Admin Console documentation for specific instructions on how to [manage 
 
 Once you are assigned as a developer, you can start creating integrations in [Adobe Developer Console](https://www.adobe.com/go/devs_console_ui). These integrations are a pipeline from external apps and services to Adobe APIs.
 
-# Creating API Credentials
+## Creating API Credentials
 
-The following page includes details of how you go about setting up an OAuth client that can access the Workfront APIs
+The following steps walk you through setting up OAuth Server-to-Server credentials for Brand Intelligence.
 
 ## Step 1: Developer Console Access
 
@@ -53,7 +50,7 @@ Adobe Brand Intelligence API's are associated with a single API named "Adobe Bra
 
 Select the OAuth Server-to-Server authentication type.
 
-Next, select the OAuth Server-to-Server authentication type to generate access tokens and access the Experience Platform API. Give your credential a meaningful name in the Credential name text field before selecting Next.
+Next, select the OAuth Server-to-Server authentication type to generate access tokens and access the Brand Intelligence API. Give your credential a meaningful name in the Credential name text field before selecting Next.
 
 ![image](images/oath.png "Console")
 
@@ -68,3 +65,50 @@ Once selected, you will be sent back to the Project page where your new Oauth Se
 Clicking into the details of that credential you can see important information that includes how you generate the access token.
 
 ![image](images/details.png "Console")
+
+
+## Using your access token
+
+### Generate a token
+
+With your credentials in hand, request a token from Adobe IMS:
+
+```bash
+export CLIENT_ID=<your_client_id>
+export CLIENT_SECRET=<your_client_secret>
+
+curl --location 'https://ims-na1.adobelogin.com/ims/token/v3' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=client_credentials' \
+  --data-urlencode "client_id=$CLIENT_ID" \
+  --data-urlencode "client_secret=$CLIENT_SECRET" \
+  --data-urlencode 'scope=openid,AdobeID'
+```
+
+**Example response:**
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsIng1dSI6...",
+  "token_type": "bearer",
+  "expires_in": 86399
+}
+```
+
+### Make authenticated requests
+
+Include the token in every Brand Intelligence API request:
+
+```bash
+--header "Authorization: Bearer <your_access_token>"
+```
+
+Brand Intelligence resolves your tenant and permissions from the token. There is no separate API key.
+
+### Token expiry and refresh
+
+Each token is valid for 24 hours (`expires_in: 86399` seconds). Implement a mechanism to detect approaching expiry and request a new token before the current one expires to maintain uninterrupted access.
+
+<InlineAlert variant="warning" slots="text"/>
+
+Never commit or log your Client ID, Client Secret, or access tokens. Store credentials securely server-side and keep them out of version control.

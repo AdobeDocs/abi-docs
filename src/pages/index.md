@@ -1,36 +1,52 @@
 ---
-title: Overview - Brand Intelligence  
-description: This is the overview page of Brand Intelligence
+title: Adobe Brand Intelligence APIs
+description: Validate creative assets against brand guidelines using the Adobe Brand Intelligence API.
 contributors:
   - https://github.com/Aeabreu-hub
 ---
 
-<Superhero slots="heading, text" background="rgb(194, 100, 29)"/>
+<SuperHero slots="heading, text" background="rgb(194, 100, 29)"/>
 
-# Adobe Brand Intelligence
+# Adobe Brand Intelligence APIs
 
-Explore the API documentation for Adobe Brand Intelligence
+Validate creative assets against brand guidelines at scale, and manage review feedback across your organisation.
 
 ## Overview
 
-Adobe Brand Intelligence System(ABIS) is a standalone offering that enables Enterprises to capture both explicit and implicit brand guidelines. Use this service to:
+Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for enterprises. It checks creative assets - designs, images, documents, and layouts - against your organisation's brand guidelines and campaign-specific rules before they are published.
 
-* Validate how the brand shows up across channels.
-* Instruct automated assembly using creative apps.
-* Predict engagement before activation.
+Use the ABI API to:
+
+- **Validate assets in bulk** - submit batches of up to 100 assets and receive structured pass/fail feedback per asset.
+- **Integrate into authoring tools** - surface brand violations directly in InDesign, Figma, and other creative tools.
+- **Manage review feedback** - attach structured comments to flagged assets and track reviewer acceptance or rejection.
 
 ## Discover
 
 <DiscoverBlock slots="heading, link, text"/>
 
-### General Guides
+### Get Started
 
-[Setup API Credentials and Access](guides/gaining-access/index.md)
+[Core Concepts](guides/core-concepts/index.md)
 
-Guide for how to setup your Authentication credentials and gain access to the API's
-
-### API References
-
-[Adobe Brand Intelligence APIs](api/index.md)
+Understand the async job model, the Jobs → Items → Comments resource hierarchy, and how validation results are structured.
 
 <DiscoverBlock slots="link, text"/>
+
+[Gaining Access](guides/gaining-access/index.md)
+
+Set up OAuth Server-to-Server credentials in Adobe Developer Console and generate your first access token.
+
+<DiscoverBlock slots="link, text"/>
+
+[Quickstart](guides/quickstart/index.md)
+
+Submit your first validation job and retrieve results with step-by-step `curl` examples.
+
+<DiscoverBlock slots="heading, link, text"/>
+
+### API Reference
+
+[Brand Intelligence API](api/index.md)
+
+Full OpenAPI reference for the Review and Approve endpoints.
