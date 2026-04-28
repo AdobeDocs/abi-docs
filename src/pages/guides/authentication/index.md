@@ -20,7 +20,7 @@ Before making API calls, your organisation's **brand profile** must be configure
 
 Before creating integrations on Adobe Developer Console, your account must have developer access in Adobe Admin Console.
 
-See the Admin Console documentation for specific instructions on how to [manage developer access for product profiles](https://helpx.adobe.com/enterprise/admin-guide.html/enterprise/using/manage-developers.ug.html).
+See the Admin Console documentation for specific instructions on how to [manage developer access for product profiles](https://helpx.adobe.com/enterprise/using/manage-developers.html).
 
 Once assigned as a developer, you can create integrations in [Adobe Developer Console](https://developer.adobe.com). These integrations connect external apps and services to Adobe APIs.
 
