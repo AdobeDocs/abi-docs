@@ -46,17 +46,13 @@ After creating a project, select **Add API**.
 
 Adobe Brand Intelligence APIs are listed under the **Adobe Firefly Services** category as **Adobe Brand Intelligence**.
 
-![image](images/select-workfront.png "Console")
+![image](images/select-abi.png "Console")
 
 ### Step 3: Configure OAuth Server-to-Server credentials
 
 Select the **OAuth Server-to-Server** credential type. Give your credential a meaningful name and select **Next**.
 
 ![image](images/oath.png "Console")
-
-If your IMS Org has multiple instances, select the instance you want this API client associated with.
-
-![image](images/instance-selector.png "Console")
 
 Your new credential is now listed in the project.
 
