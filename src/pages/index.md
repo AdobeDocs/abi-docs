@@ -19,35 +19,18 @@ Adobe Brand Intelligence System(ABIS) is a standalone offering that enables Ente
 * Instruct automated assembly using creative apps.
 * Predict engagement before activation.
 
-## Base URLs
+## Discover
 
-| Environment | URL                          |
-|-------------|------------------------------|
-| Dev         | `https://abi-dev.adobe.io`   |
-| Stage       | `https://abi-stage.adobe.io` |
-| Prod  [index.md](index.md)      | `https://abi.adobe.io`       |
+<DiscoverBlock slots="heading, link, text"/>
 
-## Authentication
+### General Guides
 
-The service is authenticated using API key, IMS token.
+[Setup API Credentials and Access](guides/gaining-access/index.md)
 
-* **FDE Interface**: Protected by Service Token.
-* **Skill Interface**: Protected by IMS User Token.
+Guide for how to setup your Authentication credentials and gain access to the API's
 
-## APIs
+### API References
 
-| API             | Description                         | Auth          |
-|-----------------|-------------------------------------|---------------|
-| FDE Inteface    | Manages tenants and configurations  | Service Token |
-| Skill Interface | Provides Headless API to use Skills | User Token    |
-| Book keeping    | Get context related to campaigns    | User Token    |
+[Adobe Brand Intelligence APIs](api/index.md)
 
-Each API has its own detailed reference in the sidebar.
-
-## Common Headers
-
-| Header          | Required | Description                |
-|-----------------|----------|----------------------------|
-| `Authorization` | Yes      | Bearer token               |
-| `x-api-key`     | Yes      | Client API key             |
-| `x-request-id`  | No       | Correlation ID for tracing |
+<DiscoverBlock slots="link, text"/>
