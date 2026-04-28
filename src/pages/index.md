@@ -18,7 +18,6 @@ Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for ent
 Use the ABI API to:
 
 - **Validate assets in bulk** - submit batches of up to 100 assets and receive structured pass/fail feedback per asset.
-- **Integrate into authoring tools** - surface brand violations directly in InDesign, Figma, and other creative tools.
 - **Manage review feedback** - attach structured comments to flagged assets and track reviewer acceptance or rejection.
 
 ## Discover
@@ -33,7 +32,7 @@ Understand the async job model, the Jobs → Items → Comments resource hierarc
 
 <DiscoverBlock slots="link, text"/>
 
-[Gaining Access](guides/gaining-access/index.md)
+[Authentication](guides/authentication/index.md)
 
 Set up OAuth Server-to-Server credentials in Adobe Developer Console and generate your first access token.
 

@@ -9,7 +9,8 @@ This guide walks you through the complete validation flow - from getting an acce
 
 ## Prerequisites
 
-- OAuth Server-to-Server credentials set up in Adobe Developer Console (see [Gaining Access](../gaining-access/index.md)).
+- Your organisation's **brand profile** is configured. This is set up during Adobe Brand Intelligence onboarding — contact your Adobe representative if this has not been completed.
+- OAuth Server-to-Server credentials set up in Adobe Developer Console (see [Authentication](../authentication/index.md)).
 - Your **Client ID** and **Client Secret** available in a secure terminal session.
 - One or more asset URLs accessible from Adobe's servers (publicly reachable or pre-signed).
 
@@ -18,16 +19,7 @@ This guide walks you through the complete validation flow - from getting an acce
 
 The Brand Intelligence API is asynchronous. You submit a job, receive a `jobId`, poll until the job completes, then fetch per-asset results.
 
-```mermaid
-flowchart LR
-    A([1. Get access token]) --> B[2. Submit job\nPOST /review-and-approve]
-    B --> C[202 Accepted\nreceive jobId]
-    C --> D{3. Poll job status\nGET /{jobId}}
-    D -->|running| D
-    D -->|succeeded / partially_succeeded| E[4. Fetch results\nGET /{jobId}/items]
-    D -->|failed| F([Handle failure])
-    E --> G([Process validation results])
-```
+![ABI Sequence Diagram](images/abi-flow.png)
 
 
 ## Step 1 - Get an access token

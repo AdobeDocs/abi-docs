@@ -10,7 +10,7 @@ Postman is a convenient way to explore the Brand Intelligence API without writin
 ## Prerequisites
 
 - [Postman](https://www.postman.com/downloads/) installed.
-- OAuth Server-to-Server credentials from Adobe Developer Console (see [Gaining Access](../gaining-access/index.md)).
+- OAuth Server-to-Server credentials from Adobe Developer Console (see [Authentication](../authentication/index.md)).
 
 
 ## Step 1 - Set up a Postman environment
