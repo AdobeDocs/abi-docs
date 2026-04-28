@@ -77,4 +77,4 @@ Endpoints that return lists (`/items`, `/comments`, job listings) use **cursor-b
 
 ## Authentication
 
-Every request requires an IMS Bearer token in the `Authorization` header. Tokens are valid for 24 hours. See [Gaining Access](../gaining-access/index.md) for setup instructions.
+Every request requires an IMS Bearer token in the `Authorization` header. Tokens are valid for 24 hours. See [Authentication](../authentication/index.md) for setup instructions.

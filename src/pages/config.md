@@ -10,7 +10,7 @@
 
 - subPages:
     - [Guides](/guides/index.md)
+        - [Authentication](/guides/authentication/index.md)
         - [Core Concepts](/guides/core-concepts/index.md)
-        - [Gaining Access](/guides/gaining-access/index.md)
         - [Quickstart](/guides/quickstart/index.md)
         - [Using Postman](/guides/using-postman/index.md)
