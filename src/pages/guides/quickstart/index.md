@@ -9,7 +9,7 @@ This guide walks you through the complete validation flow - from getting an acce
 
 ## Prerequisites
 
-- Your organisation's **brand profile** is configured. This is set up during Adobe Brand Intelligence onboarding — contact your Adobe representative if this has not been completed.
+- Your organization's **brand profile** is configured. This is set up during Adobe Brand Intelligence onboarding — contact your Adobe representative if this has not been completed.
 - OAuth Server-to-Server credentials set up in Adobe Developer Console (see [Authentication](../authentication/index.md)).
 - Your **Client ID** and **Client Secret** available in a secure terminal session.
 - One or more asset URLs accessible from Adobe's servers (publicly reachable or pre-signed).
@@ -90,7 +90,7 @@ export JOB_ID=9b9d00c5-8659-4766-8430-ed0a1c9bd87d
 
 <InlineAlert variant="info" slots="text"/>
 
-`campaignId` is optional. Omit it to validate against organisation-level brand guidelines only. Include it to also apply campaign-specific rules.
+`campaignId` is optional. Omit it to validate against organization-level brand guidelines only. Include it to also apply campaign-specific rules.
 
 
 ## Step 3 - Poll job status
@@ -136,16 +136,15 @@ curl --request GET \
     {
       "nodeId": "banner-01",
       "status": "SUCCEEDED",
-      "validationSummary": { "passedCount": 4, "failedCount": 0 },
+      "validationSummary": { "failedCount": 0 },
       "validationErrors": []
     },
     {
       "nodeId": "banner-02",
       "status": "SUCCEEDED",
-      "validationSummary": { "passedCount": 2, "failedCount": 1 },
+      "validationSummary": { "failedCount": 1 },
       "validationErrors": [
         {
-          "ruleId": "color-palette",
           "severity": "error",
           "message": "Color #FF0000 is not in the approved palette."
         }
