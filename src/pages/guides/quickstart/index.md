@@ -64,8 +64,14 @@ curl --request POST \
     "batchName": "Spring Campaign - Banner Set",
     "campaignId": "<your_campaign_id>",
     "assets": [
-      { "nodeId": "banner-01", "url": "<asset_url_1>" },
-      { "nodeId": "banner-02", "url": "<asset_url_2>" }
+      {
+        "clientItemId": "banner-01",
+        "asset": { "mediaType": "image/png", "value": "<asset_url_1>" }
+      },
+      {
+        "clientItemId": "banner-02",
+        "asset": { "mediaType": "image/png", "value": "<asset_url_2>" }
+      }
     ]
   }'
 ```
@@ -132,21 +138,22 @@ curl --request GET \
 
 ```json
 {
+  "jobId": "9b9d00c5-8659-4766-8430-ed0a1c9bd87d",
   "items": [
     {
-      "nodeId": "banner-01",
+      "clientItemId": "banner-01",
       "status": "SUCCEEDED",
-      "validationSummary": { "failedCount": 0 },
+      "validationSummary": { "summaryText": "The asset meets all brand guidelines." },
       "validationErrors": []
     },
     {
-      "nodeId": "banner-02",
+      "clientItemId": "banner-02",
       "status": "SUCCEEDED",
-      "validationSummary": { "failedCount": 1 },
+      "validationSummary": { "summaryText": "The asset violates 1 brand guideline." },
       "validationErrors": [
         {
-          "severity": "error",
-          "message": "Color #FF0000 is not in the approved palette."
+          "errorId": "e1a2b3c4-0000-0000-0000-000000000001",
+          "errorSummary": "Color #FF0000 is not in the approved palette."
         }
       ]
     }
@@ -155,8 +162,6 @@ curl --request GET \
 ```
 
 Assets with an empty `validationErrors` array are fully compliant. Assets with entries require attention before publication.
-
-If the response includes a `nextCursor` field, pass it as a `cursor` query parameter to fetch the next page of results.
 
 
 ## What's next
