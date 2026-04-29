@@ -1225,10 +1225,9 @@
               }
             ],
             "title": "Tags",
-            "description": "Open-ended key-value pairs, e.g. severity or focus area.",
+            "description": "Open-ended key-value pairs, e.g. severity or guideline section.",
             "examples": [
               {
-                "focusArea": "logo",
                 "guidelineSection": "branding",
                 "severity": "high"
               }
@@ -2474,7 +2473,7 @@
               }
             ],
             "title": "Context",
-            "description": "Batch-level context items applied to all assets unless overridden per-asset. Omit to validate all available focus areas."
+            "description": "Batch-level context items applied to all assets unless overridden per-asset. Omit to run full validation."
           },
           "retentionPolicy": {
             "anyOf": [
@@ -2738,19 +2737,6 @@
         ],
         "title": "ErrorResponse"
       },
-      "FocusArea": {
-        "type": "string",
-        "enum": [
-          "logo",
-          "color",
-          "typography",
-          "layout",
-          "imagery",
-          "messaging",
-          "compliance"
-        ],
-        "title": "FocusArea"
-      },
       "FocusAreaContextItem": {
         "properties": {
           "type": {
@@ -2759,10 +2745,10 @@
             "title": "Type"
           },
           "value": {
-            "$ref": "#/components/schemas/FocusArea",
-            "description": "Brand dimension to scope validation to.",
+            "type": "string",
+            "description": "Brand dimension identifier to scope validation to. Valid values are provided by your Adobe representative during onboarding.",
             "examples": [
-              "logo"
+              "color"
             ]
           }
         },
