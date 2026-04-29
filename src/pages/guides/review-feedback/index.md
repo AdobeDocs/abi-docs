@@ -71,6 +71,8 @@ Query parameters:
 
 When `nextCursor` is non-null, pass it as the `cursor` parameter to fetch the next page.
 
+Each comment may also include `assetAttributions` and `corpusAttributions` linking back to the specific regions in the asset and the guideline chunks that informed the violation. See the [API Reference](../../api/index.md) for the full `BrandValidationError` schema.
+
 
 ## Add a comment
 
