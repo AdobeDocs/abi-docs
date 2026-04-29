@@ -19,7 +19,7 @@ Create a new environment in Postman with the following variables:
 
 | Variable | Initial value | Description |
 |----------|---------------|-------------|
-| `base_url` | `https://bb-cortex.adobe.io` | Brand Intelligence API base URL |
+| `base_url` | `https://abi.adobe.io` | Brand Intelligence API base URL |
 | `ims_url` | `https://ims-na1.adobelogin.com` | Adobe IMS token endpoint base URL |
 | `client_id` | *(your Client ID)* | From Adobe Developer Console |
 | `client_secret` | *(your Client Secret)* | From Adobe Developer Console - mark as **secret** |
