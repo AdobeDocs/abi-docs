@@ -167,5 +167,5 @@ Assets with an empty `validationErrors` array are fully compliant. Assets with e
 ## What's next
 
 - Explore all available endpoints in the [API Reference](../../api/index.md).
-- Learn about [Comments](../core-concepts/index.md) to attach reviewer feedback to flagged assets.
+- Learn how to [attach reviewer feedback](../review-feedback/index.md) to flagged assets.
 - Try the API interactively with [Postman](../using-postman/index.md).
