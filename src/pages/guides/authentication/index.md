@@ -9,11 +9,11 @@ This guide walks you through setting up OAuth Server-to-Server credentials in Ad
 
 <InlineAlert variant="info" slots="text"/>
 
-Before making API calls, your organisation's **brand profile** must be configured as part of your Adobe Brand Intelligence onboarding. Contact your Adobe representative if this has not been completed.
+Before making API calls, your organization's **brand profile** must be configured as part of your Adobe Brand Intelligence onboarding. Contact your Adobe representative if this has not been completed.
 
 ## Prerequisites
 
-- An organisation with access to Adobe Brand Intelligence.
+- An organization with access to Adobe Brand Intelligence.
 - An Admin Console administrator who can add you as a developer on a product profile.
 
 ## Gain developer access

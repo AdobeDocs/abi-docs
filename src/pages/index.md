@@ -9,11 +9,11 @@ contributors:
 
 # Adobe Brand Intelligence APIs
 
-Validate creative assets against brand guidelines at scale, and manage review feedback across your organisation.
+Validate creative assets against brand guidelines at scale, and manage review feedback across your organization.
 
 ## Overview
 
-Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for enterprises. It checks creative assets - designs, images, documents, and layouts - against your organisation's brand guidelines and campaign-specific rules before they are published.
+Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for enterprises. It checks creative assets - designs, images, documents, and layouts - against your organization's brand guidelines and campaign-specific rules before they are published.
 
 Use the ABI API to:
 
