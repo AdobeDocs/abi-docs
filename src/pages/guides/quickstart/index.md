@@ -153,7 +153,28 @@ curl --request GET \
       "validationErrors": [
         {
           "errorId": "e1a2b3c4-0000-0000-0000-000000000001",
-          "errorSummary": "Color #FF0000 is not in the approved palette."
+          "errorSummary": "Color #FF0000 is not in the approved palette.",
+          "assetAttributions": [
+            {
+              "documentId": "banner-02.png",
+              "documentUrl": "https://example.com/signed/banner-02.png",
+              "chunkUrl": "https://example.com/signed/banner-02-region.png",
+              "regions": [
+                {
+                  "regionType": "boundingBox",
+                  "boundingBox": { "x": 0.1, "y": 0.05, "width": 0.3, "height": 0.15 }
+                }
+              ]
+            }
+          ],
+          "corpusAttributions": [
+            {
+              "documentId": "brand-guidelines-color.pdf",
+              "documentUrl": "https://example.com/signed/brand-guidelines-color.pdf",
+              "chunkUrl": "https://example.com/signed/brand-guidelines-color-p4.pdf",
+              "metadata": { "page": 4 }
+            }
+          ]
         }
       ]
     }
@@ -162,6 +183,8 @@ curl --request GET \
 ```
 
 Assets with an empty `validationErrors` array are fully compliant. Assets with entries require attention before publication.
+
+The response includes additional fields per item and per violation — see the [API Reference](../../api/index.md) for the full schema.
 
 
 ## What's next

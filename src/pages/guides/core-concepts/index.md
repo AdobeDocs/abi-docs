@@ -81,8 +81,12 @@ Each item in the results contains:
 - **`validationErrors`** - list of individual violations. Each violation includes:
   - `errorId` - unique identifier for this violation instance.
   - `errorSummary` - human-readable description of the violation.
+  - `assetAttributions` - regions within the submitted asset that triggered the violation. Each entry includes a `documentUrl` (signed URL to the asset), `chunkUrl` (signed URL to the specific region), and `regions` (bounding box in normalised 0–1 coordinates).
+  - `corpusAttributions` - chunks from the brand guidelines corpus that the violation was assessed against. Each entry includes a `documentId`, `documentUrl`, and `chunkUrl` pointing to the guideline source.
 
 An item with an empty `validationErrors` array is fully compliant.
+
+See the [API Reference](../../api/index.md) for the full `BrandValidationError` schema including reviewer feedback fields.
 
 
 ## Pagination
