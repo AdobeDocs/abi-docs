@@ -79,7 +79,10 @@ Create a **POST** request:
 {
   "batchName": "My first validation job",
   "assets": [
-    { "nodeId": "asset-01", "url": "<publicly accessible asset URL>" }
+    {
+      "clientItemId": "asset-01",
+      "asset": { "mediaType": "image/png", "value": "<publicly accessible asset URL>" }
+    }
   ]
 }
 ```
