@@ -57,7 +57,7 @@ Submit one or more assets for brand validation. Each asset requires a `nodeId` (
 
 ```bash
 curl --request POST \
-  --url 'https://bb-cortex.adobe.io/api/v1/review-and-approve' \
+  --url 'https://abi.adobe.io/api/v1/review-and-approve' \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
   --header 'Content-Type: application/json' \
   --data '{
@@ -81,7 +81,7 @@ curl --request POST \
 ```json
 {
   "jobId": "9b9d00c5-8659-4766-8430-ed0a1c9bd87d",
-  "statusUrl": "https://bb-cortex.adobe.io/api/v1/review-and-approve/9b9d00c5-8659-4766-8430-ed0a1c9bd87d",
+  "statusUrl": "https://abi.adobe.io/api/v1/review-and-approve/9b9d00c5-8659-4766-8430-ed0a1c9bd87d",
   "submittedCount": 2,
   "acceptedCount": 2,
   "rejectedCount": 0
@@ -105,7 +105,7 @@ Call the status endpoint every 5–10 seconds until the job reaches a terminal s
 
 ```bash
 curl --request GET \
-  --url "https://bb-cortex.adobe.io/api/v1/review-and-approve/$JOB_ID" \
+  --url "https://abi.adobe.io/api/v1/review-and-approve/$JOB_ID" \
   --header "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -130,7 +130,7 @@ Once the job completes, retrieve validation results for each asset.
 
 ```bash
 curl --request GET \
-  --url "https://bb-cortex.adobe.io/api/v1/review-and-approve/$JOB_ID/items" \
+  --url "https://abi.adobe.io/api/v1/review-and-approve/$JOB_ID/items" \
   --header "Authorization: Bearer $ACCESS_TOKEN"
 ```
 

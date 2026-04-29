@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://bb-cortex.adobe.io",
+      "url": "https://abi.adobe.io",
       "description": "production"
     }
   ],
@@ -1277,7 +1277,7 @@
               }
             ],
             "title": "Rejectiondetails",
-            "description": "Structured rejection metadata. Shape determined by brand-brain."
+            "description": "Structured rejection metadata. Shape determined by the service."
           },
           "errorSource": {
             "anyOf": [
@@ -1482,7 +1482,7 @@
               }
             ],
             "title": "Attempts",
-            "description": "Ordered list of processing attempt records. Shape is determined by brand-brain and may evolve."
+            "description": "Ordered list of processing attempt records. Shape is determined by Adobe Brand Intelligence and may evolve."
           }
         },
         "type": "object",
@@ -1758,7 +1758,7 @@
               }
             ],
             "title": "Tags",
-            "description": "Open-ended key-value pairs attached to this item by brand-brain."
+            "description": "Open-ended key-value pairs attached to this item by Adobe Brand Intelligence."
           }
         },
         "type": "object",
@@ -2156,7 +2156,7 @@
             "title": "Statusurl",
             "description": "Canonical URL to poll this job's status.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-..."
             ]
           },
           "cancelUrl": {
@@ -2171,7 +2171,7 @@
             "title": "Cancelurl",
             "description": "URL to cancel this batch job.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-.../cancel"
             ]
           },
           "tenantId": {
@@ -2379,7 +2379,7 @@
               }
             ],
             "title": "Expiresat",
-            "description": "When brand-brain will purge results for this batch.",
+            "description": "When Adobe Brand Intelligence will purge results for this batch.",
             "examples": [
               "2026-05-07T22:47:22Z"
             ]
@@ -2485,7 +2485,7 @@
               }
             ],
             "title": "Retentionpolicy",
-            "description": "How long brand-brain should retain results for this batch.",
+            "description": "How long Adobe Brand Intelligence should retain results for this batch.",
             "examples": [
               "30_days"
             ]
@@ -2505,7 +2505,7 @@
           "assets"
         ],
         "title": "BulkValidateRequest",
-        "description": "Bulk validation request payload.\n\n``tenantId`` is intentionally absent \u2014 bb-cortex resolves it from the\n``Authorization`` bearer token and injects it before forwarding to brand-brain."
+        "description": "Bulk validation request payload.\n\n``tenantId`` is intentionally absent \u2014 it is resolved automatically from the ``Authorization`` bearer token."
       },
       "BulkValidateSubmitResponse": {
         "properties": {
@@ -2565,7 +2565,7 @@
             "title": "Statusurl",
             "description": "Canonical URL to poll this job's status.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-..."
             ]
           },
           "cancelUrl": {
@@ -2580,7 +2580,7 @@
             "title": "Cancelurl",
             "description": "URL to cancel this batch job.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-.../cancel"
             ]
           },
           "submittedCount": {
@@ -2611,7 +2611,7 @@
             "items": {},
             "type": "array",
             "title": "Rejections",
-            "description": "Details for each rejected item. Empty list when rejectedCount is 0. Shape is determined by brand-brain."
+            "description": "Details for each rejected item. Empty list when rejectedCount is 0. Shape is determined by Adobe Brand Intelligence."
           }
         },
         "type": "object",
