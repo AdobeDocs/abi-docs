@@ -2,7 +2,16 @@
     - /adobe-brand-intelligence/
 
 - pages:
-    - [About Brand Intelligence API](index.md)
+    - [Adobe Brand Intelligence APIs](/index.md)
+    - [Guides](/guides/index.md)
     - API Reference
-        - [BB Cortex](api/index.md)
+        - [Brand Intelligence API](/api/index.md)
+    - [Support](/support/index.md)
+
 - subPages:
+    - [Guides](/guides/index.md)
+        - [Authentication](/guides/authentication/index.md)
+        - [Core Concepts](/guides/core-concepts/index.md)
+        - [Quickstart](/guides/quickstart/index.md)
+        - [Review Feedback](/guides/review-feedback/index.md)
+        - [Using Postman](/guides/using-postman/index.md)
