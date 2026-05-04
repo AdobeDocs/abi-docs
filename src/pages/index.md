@@ -1,53 +1,51 @@
 ---
-title: Overview - Brand Intelligence  
-description: This is the overview page of Brand Intelligence
+title: Adobe Brand Intelligence APIs
+description: Validate creative assets against brand guidelines using the Adobe Brand Intelligence API.
 contributors:
   - https://github.com/Aeabreu-hub
 ---
 
-<Superhero slots="heading, text" background="rgb(194, 100, 29)"/>
+<SuperHero slots="heading, text" background="rgb(194, 100, 29)"/>
 
-# Adobe Brand Intelligence
+# Adobe Brand Intelligence APIs
 
-Explore the API documentation for Adobe Brand Intelligence
+Validate creative assets against brand guidelines at scale, and manage review feedback across your organization.
 
 ## Overview
 
-Adobe Brand Intelligence System(ABIS) is a standalone offering that enables Enterprises to capture both explicit and implicit brand guidelines. Use this service to:
+Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for enterprises. It checks creative assets - designs, images, documents, and layouts - against your organization's brand guidelines and campaign-specific rules before they are published.
 
-* Validate how the brand shows up across channels.
-* Instruct automated assembly using creative apps.
-* Predict engagement before activation.
+Use the ABI API to:
 
-## Base URLs
+- **Validate assets in bulk** - submit batches of up to 100 assets and receive structured pass/fail feedback per asset.
+- **Manage review feedback** - attach structured comments to flagged assets and track reviewer acceptance or rejection. See [Review Feedback](guides/review-feedback/index.md).
 
-| Environment | URL                          |
-|-------------|------------------------------|
-| Dev         | `https://abi-dev.adobe.io`   |
-| Stage       | `https://abi-stage.adobe.io` |
-| Prod  [index.md](index.md)      | `https://abi.adobe.io`       |
+## Discover
 
-## Authentication
+<DiscoverBlock slots="heading, link, text"/>
 
-The service is authenticated using API key, IMS token.
+### Get Started
 
-* **FDE Interface**: Protected by Service Token.
-* **Skill Interface**: Protected by IMS User Token.
+[Core Concepts](guides/core-concepts/index.md)
 
-## APIs
+Understand the async job model, the Jobs → Items → Comments resource hierarchy, and how validation results are structured.
 
-| API             | Description                         | Auth          |
-|-----------------|-------------------------------------|---------------|
-| FDE Inteface    | Manages tenants and configurations  | Service Token |
-| Skill Interface | Provides Headless API to use Skills | User Token    |
-| Book keeping    | Get context related to campaigns    | User Token    |
+<DiscoverBlock slots="link, text"/>
 
-Each API has its own detailed reference in the sidebar.
+[Authentication](guides/authentication/index.md)
 
-## Common Headers
+Set up OAuth Server-to-Server credentials in Adobe Developer Console and generate your first access token.
 
-| Header          | Required | Description                |
-|-----------------|----------|----------------------------|
-| `Authorization` | Yes      | Bearer token               |
-| `x-api-key`     | Yes      | Client API key             |
-| `x-request-id`  | No       | Correlation ID for tracing |
+<DiscoverBlock slots="link, text"/>
+
+[Quickstart](guides/quickstart/index.md)
+
+Submit your first validation job and retrieve results with step-by-step `curl` examples.
+
+<DiscoverBlock slots="heading, link, text"/>
+
+### API Reference
+
+[Brand Intelligence API](api/index.md)
+
+Full OpenAPI reference for the Review and Approve endpoints.

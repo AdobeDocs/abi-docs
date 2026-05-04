@@ -1,12 +1,12 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "BB Cortex",
+    "title": "Adobe Brand Intelligence",
     "version": "0.1.0"
   },
   "servers": [
     {
-      "url": "https://bb-cortex.adobe.io",
+      "url": "https://abi.adobe.io",
       "description": "production"
     }
   ],
@@ -378,7 +378,7 @@
           "Review & Approve"
         ],
         "summary": "Fetch per-asset validation results for a bulk job",
-        "description": "Returns validation results for individual assets within a bulk job. While the batch is still running, only assets that have reached a terminal state (`SUCCEEDED` or `FAILED`) are included \u2014 poll again as `pendingCount` decreases. Once the batch is complete, all submitted assets are present.\n\nEach item contains `validationErrors` and `validationSummary` on `SUCCEEDED`, or a `message` on `FAILED`.",
+        "description": "Returns validation results for individual assets within a bulk job. While the batch is still running, only assets that have reached a terminal state (`SUCCEEDED` or `FAILED`) are included \u2014 poll again as `pendingCount` decreases. Once the batch is complete, all submitted assets are present.\n\nEach item contains `validationErrors` and `validationSummary` on `SUCCEEDED`, or a `message` on `FAILED`.\n\nUse `hasErrors=true` to return only succeeded items with validation errors, or `hasErrors=false` to return only succeeded items with no errors. Omit to return all items regardless of error state.",
         "operationId": "poll_bulk_validate_items_api_v1_review_and_approve__job_id__items_get",
         "security": [
           {
@@ -394,6 +394,24 @@
               "type": "string",
               "title": "Job Id"
             }
+          },
+          {
+            "name": "hasErrors",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter succeeded items by error presence. `true` \u2192 items with errors only; `false` \u2192 items without errors only. Non-succeeded items are unaffected by this filter.",
+              "title": "Haserrors"
+            },
+            "description": "Filter succeeded items by error presence. `true` \u2192 items with errors only; `false` \u2192 items without errors only. Non-succeeded items are unaffected by this filter."
           }
         ],
         "responses": {
@@ -1207,10 +1225,9 @@
               }
             ],
             "title": "Tags",
-            "description": "Open-ended key-value pairs, e.g. severity or focus area.",
+            "description": "Open-ended key-value pairs, e.g. severity or guideline section.",
             "examples": [
               {
-                "focusArea": "logo",
                 "guidelineSection": "branding",
                 "severity": "high"
               }
@@ -1260,7 +1277,7 @@
               }
             ],
             "title": "Rejectiondetails",
-            "description": "Structured rejection metadata. Shape determined by brand-brain."
+            "description": "Structured rejection metadata. Shape determined by the service."
           },
           "errorSource": {
             "anyOf": [
@@ -1465,7 +1482,7 @@
               }
             ],
             "title": "Attempts",
-            "description": "Ordered list of processing attempt records. Shape is determined by brand-brain and may evolve."
+            "description": "Ordered list of processing attempt records. Shape is determined by Adobe Brand Intelligence and may evolve."
           }
         },
         "type": "object",
@@ -1741,7 +1758,7 @@
               }
             ],
             "title": "Tags",
-            "description": "Open-ended key-value pairs attached to this item by brand-brain."
+            "description": "Open-ended key-value pairs attached to this item by Adobe Brand Intelligence."
           }
         },
         "type": "object",
@@ -1942,6 +1959,30 @@
               0
             ]
           },
+          "succeededWithErrors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeededwitherrors",
+            "description": "Succeeded items that have at least one validation error. Populated only on the single-job GET response; null on list responses."
+          },
+          "succeededWithoutErrors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Succeededwithouterrors",
+            "description": "Succeeded items with no validation errors. Populated only on the single-job GET response; null on list responses."
+          },
           "failed": {
             "type": "integer",
             "title": "Failed",
@@ -2115,7 +2156,7 @@
             "title": "Statusurl",
             "description": "Canonical URL to poll this job's status.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-..."
             ]
           },
           "cancelUrl": {
@@ -2130,7 +2171,7 @@
             "title": "Cancelurl",
             "description": "URL to cancel this batch job.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-.../cancel"
             ]
           },
           "tenantId": {
@@ -2338,7 +2379,7 @@
               }
             ],
             "title": "Expiresat",
-            "description": "When brand-brain will purge results for this batch.",
+            "description": "When Adobe Brand Intelligence will purge results for this batch.",
             "examples": [
               "2026-05-07T22:47:22Z"
             ]
@@ -2432,7 +2473,7 @@
               }
             ],
             "title": "Context",
-            "description": "Batch-level context items applied to all assets unless overridden per-asset. Omit to validate all available focus areas."
+            "description": "Batch-level context items applied to all assets unless overridden per-asset. Omit to run full validation."
           },
           "retentionPolicy": {
             "anyOf": [
@@ -2444,7 +2485,7 @@
               }
             ],
             "title": "Retentionpolicy",
-            "description": "How long brand-brain should retain results for this batch.",
+            "description": "How long Adobe Brand Intelligence should retain results for this batch.",
             "examples": [
               "30_days"
             ]
@@ -2464,7 +2505,7 @@
           "assets"
         ],
         "title": "BulkValidateRequest",
-        "description": "Bulk validation request payload.\n\n``tenantId`` is intentionally absent \u2014 bb-cortex resolves it from the\n``Authorization`` bearer token and injects it before forwarding to brand-brain."
+        "description": "Bulk validation request payload.\n\n``tenantId`` is intentionally absent \u2014 it is resolved automatically from the ``Authorization`` bearer token."
       },
       "BulkValidateSubmitResponse": {
         "properties": {
@@ -2524,7 +2565,7 @@
             "title": "Statusurl",
             "description": "Canonical URL to poll this job's status.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-..."
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-..."
             ]
           },
           "cancelUrl": {
@@ -2539,7 +2580,7 @@
             "title": "Cancelurl",
             "description": "URL to cancel this batch job.",
             "examples": [
-              "https://brand-brain.adobe.io/api/v1/bulk-validate-assets/ff68b036-.../cancel"
+              "https://abi.adobe.io/api/v1/review-and-approve/ff68b036-.../cancel"
             ]
           },
           "submittedCount": {
@@ -2570,7 +2611,7 @@
             "items": {},
             "type": "array",
             "title": "Rejections",
-            "description": "Details for each rejected item. Empty list when rejectedCount is 0. Shape is determined by brand-brain."
+            "description": "Details for each rejected item. Empty list when rejectedCount is 0. Shape is determined by Adobe Brand Intelligence."
           }
         },
         "type": "object",
@@ -2696,19 +2737,6 @@
         ],
         "title": "ErrorResponse"
       },
-      "FocusArea": {
-        "type": "string",
-        "enum": [
-          "logo",
-          "color",
-          "typography",
-          "layout",
-          "imagery",
-          "messaging",
-          "compliance"
-        ],
-        "title": "FocusArea"
-      },
       "FocusAreaContextItem": {
         "properties": {
           "type": {
@@ -2717,10 +2745,10 @@
             "title": "Type"
           },
           "value": {
-            "$ref": "#/components/schemas/FocusArea",
-            "description": "Brand dimension to scope validation to.",
+            "type": "string",
+            "description": "Brand dimension identifier to scope validation to. Valid values are provided by your Adobe representative during onboarding.",
             "examples": [
-              "logo"
+              "color"
             ]
           }
         },
