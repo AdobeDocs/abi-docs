@@ -15,7 +15,7 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     steps:
       - name: Download linter report artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linter-report
           run-id: ${{ github.event.workflow_run.id }}
