@@ -1,0 +1,1725 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Adobe Brand Intelligence",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://abi-mw.adobe.io",
+      "description": "production"
+    }
+  ],
+  "paths": {
+    "/api/abi/skills/invocations": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "List skill invocations",
+        "description": "Return skill invocations submitted by the calling user within their tenant, newest first.",
+        "operationId": "list_invocations_skills_invocations_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Maximum number of items to return per page. It is used as a hint only, actual response size may be smaller or larger. Check `page.next` to determine whether a further page is available.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum number of items to return per page. It is used as a hint only, actual response size may be smaller or larger. Check `page.next` to determine whether a further page is available."
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque pagination cursor from the previous page's `page.next`. Omit for the first page.",
+              "title": "Start"
+            },
+            "description": "Opaque pagination cursor from the previous page's `page.next`. Omit for the first page."
+          },
+          {
+            "name": "skill",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Skill"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Skill"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillInvocationLogResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra": {
+      "post": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Invoke RA skill",
+        "description": "Enqueue a Relevance Advisor (RA) skill invocation for one or more items within a tenant campaign. Each item must belong to the specified tenant. Returns 202 immediately; processing is asynchronous. The invocation status is `queued` when under the concurrency cap, or `pending` when at capacity.",
+        "operationId": "invoke_ra_skills_ra_post",
+        "parameters": [
+          {
+            "name": "abi-use-preview-brand",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Abi-Use-Preview-Brand"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkillRa"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillInvocationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Get RA invocation status",
+        "description": "Return the current status and counters for an RA skill invocation.",
+        "operationId": "get_ra_invocation_skills_ra__si_id__get",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillInvocationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}/cancel": {
+      "post": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Cancel an RA invocation",
+        "description": "Cancel an RA skill invocation. Idempotent — cancelling an already-cancelled invocation returns 200. Returns 409 only when the invocation has already completed or failed. Response `status` is `cancelled`.",
+        "operationId": "cancel_ra_invocation_skills_ra__si_id__cancel_post",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillInvocationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}/items": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "List items for an RA invocation",
+        "description": "Return a summary of all items in an RA invocation. Each entry contains the minimum data needed to render the job detail screen: item ID, status, media type, thumbnail URL, and whether the item has errors.",
+        "operationId": "list_ra_items_skills_ra__si_id__items_get",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RaItemSummaryList"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}/items/{item_id}": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Get detail for a single RA item",
+        "description": "Return full detail for a single item, including all violations, bounding boxes, and attributions needed to render the asset detail screen.",
+        "operationId": "get_ra_item_skills_ra__si_id__items__item_id__get",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RaItemDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}/items/{item_id}/violations/{violation_id}": {
+      "patch": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Accept, reject, or edit a violation",
+        "description": "Apply user feedback to a single violation: set its review status (accept/reject, with an optional rejection reason and free-text detail) or edit its summary text. Returns the new version via an `ETag` response header.",
+        "operationId": "update_ra_violation_skills_ra__si_id__items__item_id__violations__violation_id__patch",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "violation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Violation Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The violation's current record_version, e.g. \"6\"",
+              "title": "If-Match"
+            },
+            "description": "The violation's current record_version, e.g. \"6\""
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/SetReviewStatusAction"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResetViolationAction"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EditViolationAction"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "action",
+                  "mapping": {
+                    "setReviewStatus": "#/components/schemas/SetReviewStatusAction",
+                    "resetViolation": "#/components/schemas/ResetViolationAction",
+                    "editViolation": "#/components/schemas/EditViolationAction"
+                  }
+                },
+                "title": "Update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Feedback applied. The new version is in the `ETag` response header.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Quoted new record version, e.g. \"7\""
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/skills/ra/{si_id}/items/{item_id}/violations": {
+      "post": {
+        "tags": [
+          "skills"
+        ],
+        "summary": "Add a user-authored violation",
+        "description": "Create a new violation/comment on an item, authored by the calling user.",
+        "operationId": "create_ra_violation_skills_ra__si_id__items__item_id__violations_post",
+        "parameters": [
+          {
+            "name": "si_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Si Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRaViolationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RaItemViolation"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/storage/temp": {
+      "post": {
+        "tags": [
+          "storage"
+        ],
+        "summary": "Create temporary upload item",
+        "description": "Generate a presigned upload URL for a temporary file scoped to the tenant's storage container. The URL expires in 1 hour. The tenant container must already be provisioned — this endpoint does not create it.",
+        "operationId": "create_temp_item_storage_temp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTempItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTempItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/api/abi/storage/temp/{item_id}": {
+      "get": {
+        "tags": [
+          "storage"
+        ],
+        "summary": "Get temporary item download URL",
+        "description": "Generate a presigned read URL for a previously uploaded temporary file. The URL expires in 1 hour. Returns 404 if the item does not exist.",
+        "operationId": "get_temp_item_storage_temp__item_id__get",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTempItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "x-public": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Skill": {
+        "type": "string",
+        "enum": [
+          "ra",
+          "iassemble"
+        ],
+        "title": "Skill",
+        "description": "Skills supported by ABI"
+      },
+      "SkillInvocationLogResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SkillInvocationLogEntry"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "page"
+        ],
+        "title": "SkillInvocationLogResponse"
+      },
+      "SkillInvocationLogEntry": {
+        "properties": {
+          "invocationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Invocationid"
+          },
+          "skill": {
+            "$ref": "#/components/schemas/Skill"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SkillInvocationStatus"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "invocationId",
+          "skill",
+          "status",
+          "name",
+          "userId",
+          "createdAt"
+        ],
+        "title": "SkillInvocationLogEntry"
+      },
+      "SkillInvocationStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "queued",
+          "running",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "title": "SkillInvocationStatus",
+        "description": "Lifecycle phase of a skill invocation job.\n\nTerminal states are COMPLETED (success — partial outcomes are visible\nin ``success_count`` / ``failure_count``), FAILED (workflow / activity\nraised), and CANCELLED (user intervention before completion)."
+      },
+      "Page": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "Page"
+      },
+      "ProblemDetails": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "about:blank"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance"
+          },
+          "abi_err_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abi Err Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "status",
+          "detail"
+        ],
+        "title": "ProblemDetails",
+        "description": "RFC 9457 Problem Details body\n(https://www.rfc-editor.org/rfc/rfc9457.html).\n\nMirrors the runtime shape produced by\n``app.core.error_handlers.build_error_response``. ``abi_err_code`` is an\nRFC-permitted extension specific to ABI domain errors — it identifies\nthe problem class programmatically while ``type`` provides the\nhuman-readable docs URI."
+      },
+      "SkillRa": {
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenantid"
+          },
+          "campaignId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaignid"
+          },
+          "displayName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Displayname"
+          },
+          "notifyUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notifyurl"
+          },
+          "validationContext": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SkillRaItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tenantId",
+          "items"
+        ],
+        "title": "SkillRa",
+        "description": "RA invocation — runs validations across a list of items."
+      },
+      "ValidationContext": {
+        "properties": {
+          "focusAreas": {
+            "additionalProperties": {
+              "items": {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/FocusArea"
+            },
+            "type": "object",
+            "title": "Focusareas"
+          },
+          "dimensions": {
+            "additionalProperties": {
+              "items": {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "object",
+            "title": "Dimensions"
+          },
+          "metaData": {
+            "additionalProperties": true,
+            "propertyNames": {
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ValidationContext",
+        "description": "Per-invocation or per-item context that guides the validation pipeline."
+      },
+      "FocusArea": {
+        "type": "string",
+        "enum": [
+          "logo",
+          "layout",
+          "color",
+          "typography",
+          "compliance",
+          "design_element",
+          "imagery",
+          "messaging"
+        ],
+        "title": "FocusArea"
+      },
+      "SkillRaItem": {
+        "properties": {
+          "itemSource": {
+            "$ref": "#/components/schemas/RaItemSource",
+            "default": "blob"
+          },
+          "sourceRef": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Sourceref"
+          },
+          "mediaType": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Mediatype"
+          },
+          "itemName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Itemname"
+          },
+          "validationContext": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceRef",
+          "mediaType",
+          "itemName"
+        ],
+        "title": "SkillRaItem"
+      },
+      "RaItemSource": {
+        "type": "string",
+        "enum": [
+          "blob",
+          "acpc",
+          "aem",
+          "web"
+        ],
+        "title": "RaItemSource",
+        "description": "Source kind for an RA item's asset."
+      },
+      "SkillInvocationResponse": {
+        "properties": {
+          "invocationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Invocationid"
+          },
+          "skill": {
+            "$ref": "#/components/schemas/Skill"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenantid"
+          },
+          "campaignId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Campaignid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SkillInvocationStatus"
+          },
+          "itemCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Itemcount"
+          },
+          "successCount": {
+            "type": "integer",
+            "title": "Successcount",
+            "default": 0
+          },
+          "failureCount": {
+            "type": "integer",
+            "title": "Failurecount",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "invocationId",
+          "skill",
+          "tenantId",
+          "campaignId",
+          "status"
+        ],
+        "title": "SkillInvocationResponse"
+      },
+      "RaItemSummaryList": {
+        "properties": {
+          "itemsCount": {
+            "type": "integer",
+            "title": "Itemscount"
+          },
+          "itemsWithViolations": {
+            "type": "integer",
+            "title": "Itemswithviolations"
+          },
+          "itemsWithoutViolations": {
+            "type": "integer",
+            "title": "Itemswithoutviolations"
+          },
+          "itemsFailed": {
+            "type": "integer",
+            "title": "Itemsfailed"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "itemsCount",
+          "itemsWithViolations",
+          "itemsWithoutViolations",
+          "itemsFailed",
+          "items"
+        ],
+        "title": "RaItemSummaryList"
+      },
+      "RaItemSummary": {
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RaItemStatus"
+          },
+          "mediaType": {
+            "type": "string",
+            "title": "Mediatype"
+          },
+          "itemName": {
+            "type": "string",
+            "title": "Itemname"
+          },
+          "thumbnailUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnailurl"
+          },
+          "violationCount": {
+            "type": "integer",
+            "title": "Violationcount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "itemId",
+          "status",
+          "mediaType",
+          "itemName",
+          "thumbnailUrl",
+          "violationCount"
+        ],
+        "title": "RaItemSummary",
+        "description": "Minimal per-item data sufficient to render the job detail screen grid and stat cards."
+      },
+      "RaItemStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "queued",
+          "running",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "title": "RaItemStatus",
+        "description": "Lifecycle phase of an RA item. Mirrors SkillInvocationStatus — items\nare only created if they are uploaded (blob is in tenant storage), PENDING is\nthe initial uploaded-and-ready state (there is no separate UPLOADED)."
+      },
+      "RaItemDetail": {
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RaItemStatus"
+          },
+          "mediaType": {
+            "type": "string",
+            "title": "Mediatype"
+          },
+          "itemName": {
+            "type": "string",
+            "title": "Itemname"
+          },
+          "thumbnailUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnailurl"
+          },
+          "renditionUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Renditionurl"
+          },
+          "result": {
+            "$ref": "#/components/schemas/RaItemResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "itemId",
+          "status",
+          "mediaType",
+          "itemName",
+          "thumbnailUrl",
+          "renditionUrl",
+          "result"
+        ],
+        "title": "RaItemDetail",
+        "description": "Full per-item data for the asset detail screen."
+      },
+      "RaItemResult": {
+        "properties": {
+          "summaryText": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summarytext"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemViolation"
+            },
+            "type": "array",
+            "title": "Violations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RaItemResult"
+      },
+      "RaItemViolation": {
+        "properties": {
+          "violationId": {
+            "type": "string",
+            "title": "Violationid"
+          },
+          "violationSource": {
+            "$ref": "#/components/schemas/RaViolationSource"
+          },
+          "violationSummary": {
+            "type": "string",
+            "title": "Violationsummary"
+          },
+          "assetAttributions": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemAssetAttribution"
+            },
+            "type": "array",
+            "title": "Assetattributions"
+          },
+          "corpusAttributions": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemCorpusAttribution"
+            },
+            "type": "array",
+            "title": "Corpusattributions"
+          },
+          "tags": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Tags"
+          },
+          "reviewStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RaViolationReviewStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rejectionReason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RaViolationRejectionReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rejectionDetails": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectiondetails"
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "recordVersion": {
+            "type": "integer",
+            "title": "Recordversion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "violationId",
+          "violationSource",
+          "violationSummary",
+          "recordVersion"
+        ],
+        "title": "RaItemViolation"
+      },
+      "RaViolationSource": {
+        "type": "string",
+        "enum": [
+          "system",
+          "user"
+        ],
+        "title": "RaViolationSource",
+        "description": "Origin of an ``abi.ra_violations`` row: pipeline output vs. user-authored comment."
+      },
+      "RaItemAssetAttribution": {
+        "properties": {
+          "attributionId": {
+            "type": "string",
+            "title": "Attributionid"
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemViolationRegion"
+            },
+            "type": "array",
+            "title": "Regions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attributionId",
+          "documentId",
+          "metadata",
+          "regions"
+        ],
+        "title": "RaItemAssetAttribution",
+        "description": "A pointer into the validated asset itself (e.g. a bounding box on a page).\nNo document/chunk URL — that's only meaningful for corpus (guideline) attributions."
+      },
+      "RaItemViolationRegion": {
+        "properties": {
+          "regionType": {
+            "type": "string",
+            "title": "Regiontype"
+          },
+          "boundingBox": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boundingbox"
+          },
+          "pointer": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "regionType"
+        ],
+        "title": "RaItemViolationRegion"
+      },
+      "RaItemCorpusAttribution": {
+        "properties": {
+          "attributionId": {
+            "type": "string",
+            "title": "Attributionid"
+          },
+          "documentId": {
+            "type": "string",
+            "title": "Documentid"
+          },
+          "documentUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documenturl"
+          },
+          "chunkUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunkurl"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/RaItemViolationRegion"
+            },
+            "type": "array",
+            "title": "Regions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attributionId",
+          "documentId",
+          "metadata",
+          "regions"
+        ],
+        "title": "RaItemCorpusAttribution",
+        "description": "A pointer into a brand guideline document — carries presigned read URLs\nso the UI can jump to the referenced source (see SourceViewerScreen)."
+      },
+      "RaViolationReviewStatus": {
+        "type": "string",
+        "enum": [
+          "accepted",
+          "rejected"
+        ],
+        "title": "RaViolationReviewStatus",
+        "description": "User feedback on a violation. No PENDING member — a violation with no\nfeedback yet is represented by ``review_status IS NULL``, not a third value."
+      },
+      "RaViolationRejectionReason": {
+        "type": "string",
+        "enum": [
+          "incorrectAssessment",
+          "notApplicable"
+        ],
+        "title": "RaViolationRejectionReason",
+        "description": "Predefined rejection reason codes. Only two values per product decision."
+      },
+      "SetReviewStatusAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "setReviewStatus",
+            "title": "Action",
+            "default": "setReviewStatus"
+          },
+          "reviewStatus": {
+            "$ref": "#/components/schemas/RaViolationReviewStatus"
+          },
+          "rejectionReason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RaViolationRejectionReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rejectionDetails": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectiondetails"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reviewStatus"
+        ],
+        "title": "SetReviewStatusAction",
+        "description": "Accept or reject a violation."
+      },
+      "ResetViolationAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "resetViolation",
+            "title": "Action",
+            "default": "resetViolation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ResetViolationAction",
+        "description": "Clear a violation's feedback back to pending (un-accept / un-reject)."
+      },
+      "EditViolationAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "const": "editViolation",
+            "title": "Action",
+            "default": "editViolation"
+          },
+          "violationSummary": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Violationsummary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "violationSummary"
+        ],
+        "title": "EditViolationAction",
+        "description": "Edit a violation's summary text."
+      },
+      "CreateRaViolationRequest": {
+        "properties": {
+          "violationSummary": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Violationsummary"
+          },
+          "userName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Username"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "violationSummary",
+          "userName"
+        ],
+        "title": "CreateRaViolationRequest",
+        "description": "Add a user-authored violation/comment to an item."
+      },
+      "CreateTempItemRequest": {
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenantid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tenantId"
+        ],
+        "title": "CreateTempItemRequest"
+      },
+      "CreateTempItemResponse": {
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "title": "Uploadurl"
+          },
+          "uploadUrlExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploadurlexpiresat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "itemId",
+          "uploadUrl",
+          "uploadUrlExpiresAt"
+        ],
+        "title": "CreateTempItemResponse"
+      },
+      "GetTempItemResponse": {
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Itemid"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "urlExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Urlexpiresat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "itemId",
+          "url",
+          "urlExpiresAt"
+        ],
+        "title": "GetTempItemResponse"
+      }
+    }
+  }
+}

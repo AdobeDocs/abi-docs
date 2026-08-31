@@ -10,7 +10,7 @@ These guides walk you through everything you need to integrate with the Adobe Br
 | Guide | Description |
 |-------|-------------|
 | [Authentication](authentication/index.md) | Set up OAuth credentials and generate an access token. |
-| [Core Concepts](core-concepts/index.md) | Key concepts: async jobs, validation results, and the resource model. |
-| [Quickstart](quickstart/index.md) | Submit your first validation job end to end. |
+| [Core Concepts](core-concepts/index.md) | Key concepts: async invocations, validation results, and the resource model. |
+| [Quickstart](quickstart/index.md) | Submit your first validation invocation end to end. |
 | [Review Feedback](review-feedback/index.md) | Attach and manage reviewer feedback on validation results. |
 | [Using Postman](using-postman/index.md) | Explore and test the API using Postman. |

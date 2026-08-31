@@ -4,4 +4,4 @@ description: This is the API reference documentation for Abode's Brand Intellige
 layout: none
 hideBreadcrumbNav: true
 ---
-<RedoclyAPIBlock src="/adobe-brand-intelligence/BrandBrainSwagger.json" hideTryItPanel scrollYOffset={64} generateCodeSamples="languages: [{lang: 'curl'}]" />
+<RedoclyAPIBlock src="/adobe-brand-intelligence/abi-swagger.json" hideTryItPanel scrollYOffset={64} generateCodeSamples="languages: [{lang: 'curl'}]" />

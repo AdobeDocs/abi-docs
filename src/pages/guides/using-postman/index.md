@@ -5,7 +5,7 @@ description: Explore and test the Adobe Brand Intelligence API using Postman.
 
 # Using Postman
 
-Postman is a convenient way to explore the Brand Intelligence API without writing code. This guide walks through setting up an environment, generating a token, and running a validation job.
+Postman is a convenient way to explore the Brand Intelligence API without writing code. This guide walks through setting up an environment, generating a token, and running a validation invocation.
 
 ## Prerequisites
 
@@ -19,12 +19,13 @@ Create a new environment in Postman with the following variables:
 
 | Variable | Initial value | Description |
 |----------|---------------|-------------|
-| `base_url` | `https://abi.adobe.io` | Brand Intelligence API base URL |
+| `base_url` | `https://abi-mw.adobe.io` | Brand Intelligence API base URL |
 | `ims_url` | `https://ims-na1.adobelogin.com` | Adobe IMS token endpoint base URL |
 | `client_id` | *(your Client ID)* | From Adobe Developer Console |
 | `client_secret` | *(your Client Secret)* | From Adobe Developer Console - mark as **secret** |
 | `access_token` | *(leave blank)* | Populated automatically in Step 2 |
-| `job_id` | *(leave blank)* | Populated as you work through jobs |
+| `tenant_id` | *(your Tenant ID)* | Required on every invocation |
+| `invocation_id` | *(leave blank)* | Populated as you work through invocations |
 
 <InlineAlert variant="warning" slots="text"/>
 
@@ -62,46 +63,49 @@ Tokens are valid for 24 hours. Re-run this request when your token expires.
 You can import the Brand Intelligence OpenAPI spec directly into Postman to auto-generate a request collection:
 
 1. In Postman, select **Import**.
-2. Choose the `BrandBrainSwagger.json` file (available in the [API Reference](../../api/index.md) page or your local clone of the docs repo).
+2. Choose **Link** and paste in the OpenAPI spec URL: [`/adobe-brand-intelligence/abi-swagger.json`](/adobe-brand-intelligence/abi-swagger.json).
 3. Postman will generate a collection with all available endpoints pre-populated.
 4. Set the collection's **Authorization** to **Bearer Token** and set the token value to `{{access_token}}`.
 
 
-## Step 4 - Submit a validation job
+## Step 4 - Submit a validation invocation
 
 Create a **POST** request:
 
-- **URL:** `{{base_url}}/api/v1/review-and-approve`
+- **URL:** `{{base_url}}/api/abi/skills/ra`
 - **Authorization:** Bearer Token → `{{access_token}}`
 - **Body** (raw JSON):
 
 ```json
 {
-  "batchName": "My first validation job",
-  "assets": [
+  "tenantId": "{{tenant_id}}",
+  "displayName": "My first validation invocation",
+  "items": [
     {
-      "clientItemId": "asset-01",
-      "asset": { "mediaType": "image/png", "value": "<publicly accessible asset URL>" }
+      "itemSource": "blob",
+      "sourceRef": "<publicly accessible asset URL>",
+      "mediaType": "image/png",
+      "itemName": "asset-01"
     }
   ]
 }
 ```
 
-The response includes a `jobId`. Copy it into your `job_id` environment variable.
+The response includes an `invocationId`. Copy it into your `invocation_id` environment variable.
 
 
 ## Step 5 - Poll and retrieve results
 
-**Poll job status:**
+**Poll invocation status:**
 
-- **GET** `{{base_url}}/api/v1/review-and-approve/{{job_id}}`
+- **GET** `{{base_url}}/api/abi/skills/ra/{{invocation_id}}`
 - **Authorization:** Bearer Token → `{{access_token}}`
 
-Repeat until `status` is `succeeded`, `partially_succeeded`, `failed`, or `canceled`.
+Repeat until `status` is `completed`, `failed`, or `cancelled`.
 
 **Fetch results:**
 
-- **GET** `{{base_url}}/api/v1/review-and-approve/{{job_id}}/items`
+- **GET** `{{base_url}}/api/abi/skills/ra/{{invocation_id}}/items`
 - **Authorization:** Bearer Token → `{{access_token}}`
 
 See the [Quickstart](../quickstart/index.md) for annotated example responses.

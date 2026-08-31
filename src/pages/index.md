@@ -17,8 +17,8 @@ Adobe Brand Intelligence (ABI) is an AI-powered brand compliance service for ent
 
 Use the ABI API to:
 
-- **Validate assets in bulk** - submit batches of up to 100 assets and receive structured pass/fail feedback per asset.
-- **Manage review feedback** - attach structured comments to flagged assets and track reviewer acceptance or rejection. See [Review Feedback](guides/review-feedback/index.md).
+- **Validate assets in bulk** - submit a batch of assets and receive structured pass/fail feedback per asset.
+- **Manage review feedback** - attach structured violations to flagged assets and track reviewer acceptance or rejection. See [Review Feedback](guides/review-feedback/index.md).
 
 ## Discover
 
@@ -28,7 +28,7 @@ Use the ABI API to:
 
 [Core Concepts](guides/core-concepts/index.md)
 
-Understand the async job model, the Jobs → Items → Comments resource hierarchy, and how validation results are structured.
+Understand the async invocation model, the Invocation → Items → Violations resource hierarchy, and how validation results are structured.
 
 <DiscoverBlock slots="link, text"/>
 
@@ -40,7 +40,7 @@ Set up OAuth Server-to-Server credentials in Adobe Developer Console and generat
 
 [Quickstart](guides/quickstart/index.md)
 
-Submit your first validation job and retrieve results with step-by-step `curl` examples.
+Submit your first validation invocation and retrieve results with step-by-step `curl` examples.
 
 <DiscoverBlock slots="heading, link, text"/>
 
@@ -48,4 +48,4 @@ Submit your first validation job and retrieve results with step-by-step `curl` e
 
 [Brand Intelligence API](api/index.md)
 
-Full OpenAPI reference for the Review and Approve endpoints.
+Full OpenAPI reference for the Validation endpoints.
