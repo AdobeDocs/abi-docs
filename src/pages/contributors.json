@@ -6,10 +6,11 @@
     {
       "page": "/",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/195011431?v=4",
         "https://avatars.githubusercontent.com/u/41382203?v=4"
       ],
-      "lastUpdated": "8/31/2026"
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/api/",
@@ -22,49 +23,62 @@
     {
       "page": "/config",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/195011431?v=4",
         "https://avatars.githubusercontent.com/u/41382203?v=4"
       ],
-      "lastUpdated": "4/29/2026"
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/41382203?v=4"
       ],
-      "lastUpdated": "8/31/2026"
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/authentication/",
-      "avatars": [],
-      "lastUpdated": "4/29/2026"
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/core-concepts/",
-      "avatars": [],
-      "lastUpdated": "8/31/2026"
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/quickstart/",
-      "avatars": [],
-      "lastUpdated": "8/31/2026"
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/review-feedback/",
-      "avatars": [],
-      "lastUpdated": "8/31/2026"
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/guides/using-postman/",
-      "avatars": [],
-      "lastUpdated": "8/31/2026"
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "9/1/2026"
     },
     {
       "page": "/support/",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/41382203?v=4"
       ],
-      "lastUpdated": "8/31/2026"
+      "lastUpdated": "9/1/2026"
     }
   ],
   ":type": "sheet"
