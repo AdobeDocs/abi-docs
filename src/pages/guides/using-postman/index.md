@@ -83,13 +83,17 @@ Create a **POST** request:
   "items": [
     {
       "itemSource": "blob",
-      "sourceRef": "<publicly accessible asset URL>",
+      "sourceRef": "<itemId from uploading the asset>",
       "mediaType": "image/png",
       "itemName": "asset-01"
     }
   ]
 }
 ```
+
+<InlineAlert variant="info" slots="text"/>
+
+`sourceRef` here is the `itemId` returned by `POST /api/abi/storage/temp` after you upload the asset - see [Quickstart: Step 2](../quickstart/index.md#step-2---upload-your-assets) for the full upload flow.
 
 The response includes an `invocationId`. Copy it into your `invocation_id` environment variable.
 
