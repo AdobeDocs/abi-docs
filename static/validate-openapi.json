@@ -1,0 +1,946 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ABI Validate — MCP Tool Reference",
+    "version": "1.0.0",
+    "description": "The 7 ABI Validate MCP tools' request/response schemas. The two internal upload-panel tools (`upload_validation_asset_bytes` and `finalize_validation_upload_session`) are excluded — they are called by the MCP-Apps upload panel itself, not by integrators. ABI Validate is an MCP server: every real call goes over a single JSON-RPC endpoint at /mcp, not per-tool HTTP routes. The per-tool `POST /tools/<name>` paths documented below are a DOCUMENTATION CONVENTION only — one synthetic operation per registered MCP tool, so a human reader can see each tool's request/response shape in a familiar OpenAPI/Swagger viewer. They are not callable HTTP routes: do not run client codegen against this document and expect the result to work against /mcp."
+  },
+  "paths": {
+    "/tools/get_validation_options": {
+      "post": {
+        "operationId": "get_validation_options",
+        "summary": "See the asset input shape a validate_asset call needs. Call",
+        "description": "See the asset input shape a validate_asset call needs. Call\n            this FIRST, before validate_asset, on a host unfamiliar with the\n            ABI Validate feature (Adobe Brand Intelligence).\n\n            Inputs: none.\n            Returns: allowed source values plus guidance on media_type and\n            the bulk (list of assets) shape validate_asset expects.\n            Next: build one or more asset inputs and pass them to validate_asset.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "get_validation_optionsArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "get_validation_options result — the asset-input shape validate_asset\nexpects. Static (not tenant-fetched): there is no catalog endpoint for this.",
+                  "properties": {
+                    "source_types": {
+                      "default": [
+                        "web",
+                        "blob"
+                      ],
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Source Types",
+                      "type": "array"
+                    },
+                    "source_type_note": {
+                      "default": "'web' takes a public or presigned http(s) URL directly in `value`. 'blob' takes an `asset_id` staged via prepare_validation_asset_upload or upload_validation_asset_bytes — pass the id straight through, no separate download-URL resolution step needed.",
+                      "title": "Source Type Note",
+                      "type": "string"
+                    },
+                    "media_type_note": {
+                      "default": "media_type is the asset's MIME type (e.g. image/png, application/pdf) — not a fixed enum; send whatever MIME type matches the asset.",
+                      "title": "Media Type Note",
+                      "type": "string"
+                    },
+                    "bulk_note": {
+                      "default": "validate_asset takes a LIST of assets (1 or more) and starts one invocation that checks all of them — never call it once per asset.",
+                      "title": "Bulk Note",
+                      "type": "string"
+                    }
+                  },
+                  "title": "ValidationOptions",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/get_validation_result": {
+      "post": {
+        "operationId": "get_validation_result",
+        "summary": "Get a validation invocation's per-item results: each item's",
+        "description": "Get a validation invocation's per-item results: each item's\n            status, summary, and any brand-guideline violations found. Call\n            this to report a finished invocation — you are the only reporter\n            of results, so poll get_validation_status yourself until terminal,\n            then call this once.\n\n            Inputs: invocation_id (from validate_asset).\n            Returns: the invocation's overall status plus every item's full\n            result — item_id, status, summary, violations (empty means no\n            violations found for that item), and the asset image\n            (asset_url/asset_data_url).\n            Next: if the invocation is not yet terminal, poll\n            get_validation_status again shortly instead of calling this.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "invocation_id": {
+                    "title": "Invocation Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "invocation_id"
+                ],
+                "title": "get_validation_resultArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "get_validation_result result.\n\n``status`` mirrors the invocation's own lifecycle. ``items`` carries every\nitem's full per-item result — fetched in one call so the model never has\nto loop tool calls per item. ``asset_data_url`` is a same-origin ``data:``\nURI of each item's image, best-effort (``None`` on fetch failure, oversize,\nor a non-image asset) — prefer it over ``asset_url`` when rendering, since\na UI-capable host's iframe CSP commonly blocks a remote ``<img src>`` even\nwhen the URL itself is perfectly reachable.",
+                  "properties": {
+                    "invocation_id": {
+                      "title": "Invocation Id",
+                      "type": "string"
+                    },
+                    "status": {
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "items": {
+                      "default": [],
+                      "items": {
+                        "$ref": "#/components/schemas/ValidationItemResult"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "invocation_id",
+                    "status"
+                  ],
+                  "title": "ValidationResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/get_validation_status": {
+      "post": {
+        "operationId": "get_validation_status",
+        "summary": "Lightweight poll target for in-flight invocations — overall status",
+        "description": "Lightweight poll target for in-flight invocations. Both the live\n            progress panel and the model should poll this to track a running\n            validation invocation. It returns the invocation's overall status\n            plus a per-item status summary (no violations, no full-resolution\n            image — each item's thumbnail is included), so it is cheap enough\n            to poll every few seconds while items are in flight. Once\n            terminal, use get_validation_result instead (it also returns\n            each item's violations and full-resolution asset image).\n\n            Inputs: invocation_id (from validate_asset).\n            Returns: invocation_id, overall status, item_count,\n            success_count, failure_count, and per-item status summaries.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "invocation_id": {
+                    "title": "Invocation Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "invocation_id"
+                ],
+                "title": "get_validation_statusArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "get_validation_status result — the invocation's overall status plus a\nper-item status summary, nothing else. The progress panel's poll target:\nno violations, no asset images (get_validation_result fetches and\nbase64-encodes those per item, which is not something to redo every few\nseconds). The model may poll this too while waiting, but should read\nget_validation_result once the invocation is terminal for the full report.",
+                  "properties": {
+                    "invocation_id": {
+                      "title": "Invocation Id",
+                      "type": "string"
+                    },
+                    "status": {
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "item_count": {
+                      "title": "Item Count",
+                      "type": "integer"
+                    },
+                    "success_count": {
+                      "title": "Success Count",
+                      "type": "integer"
+                    },
+                    "failure_count": {
+                      "title": "Failure Count",
+                      "type": "integer"
+                    },
+                    "items": {
+                      "default": [],
+                      "items": {
+                        "$ref": "#/components/schemas/ValidationItemStatus"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "invocation_id",
+                    "status",
+                    "item_count",
+                    "success_count",
+                    "failure_count"
+                  ],
+                  "title": "ValidationStatus",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/get_validation_upload_status": {
+      "post": {
+        "operationId": "get_validation_upload_status",
+        "summary": "Poll this after open_validation_asset_upload instead of",
+        "description": "Poll this after open_validation_asset_upload instead of\n            waiting for a chat message from the panel — some hosts refuse to\n            let a widget send one. Poll silently, exactly like\n            get_validation_status, until settled is true. \"Poll\" means call\n            this tool again yourself, each time — never a shell command,\n            sleep loop, or reading a cached tool-result file off disk; none\n            of those re-run the tool, so none of them can ever see settled\n            flip to true.\n\n            Inputs: upload_session_id (from open_validation_asset_upload).\n            Returns: settled (false while the panel's batch is still\n            uploading) and assets (each staged file's asset_id, media_type,\n            asset_name — ready to pass straight to validate_asset).\n            Next: if settled is false, poll again shortly. Once true, use\n            assets for validate_asset; an empty list means every upload in\n            the batch failed.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "upload_session_id": {
+                    "title": "Upload Session Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "upload_session_id"
+                ],
+                "title": "get_validation_upload_statusArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "``settled`` is false until the panel's current upload batch finishes\n(``finalize_validation_upload_session``) — the model should keep polling\nuntil it flips true, then use ``assets`` for ``validate_asset``. An empty\n``assets`` list with ``settled: true`` means every file in the batch\nfailed to upload.",
+                  "properties": {
+                    "settled": {
+                      "title": "Settled",
+                      "type": "boolean"
+                    },
+                    "assets": {
+                      "default": [],
+                      "items": {
+                        "$ref": "#/components/schemas/StagedUploadAssetSummary"
+                      },
+                      "title": "Assets",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "settled"
+                  ],
+                  "title": "ValidationUploadStatus",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/open_validation_asset_upload": {
+      "post": {
+        "operationId": "open_validation_asset_upload",
+        "summary": "Open an inline panel to upload LOCAL creative files for ABI",
+        "description": "Open an inline panel to upload LOCAL creative files for ABI\n            Validate (Adobe Brand Intelligence) brand-compliance validation\n            (drag-and-drop, multiple files — they'll all validate together in\n            one bulk invocation). DEFAULT to this whenever the user hasn't\n            given an asset yet — no URL, no path, no attachment in their\n            message, even a bare \"validate this\" — open the panel\n            immediately rather than asking a text question first. If they\n            already gave a concrete local path, call\n            prepare_validation_asset_upload directly instead — do not open\n            this panel just to ask the user to re-drag a file whose path\n            they already gave you. Never ask the user to paste asset JSON\n            themselves.\n\n            Inputs: none.\n            Returns: opens the panel, plus an upload_session_id. Once you're\n            done waiting on the panel, poll\n            get_validation_upload_status(upload_session_id) yourself,\n            silently, until it reports settled: true — do not wait for a\n            chat message from the panel, some hosts refuse to let it send\n            one. On a host that can't render the panel, the message instead\n            points at prepare_validation_asset_upload.\n            Next: once settled, pass its assets to validate_asset as\n            assets: [{source: \"blob\", asset_id, media_type, asset_name}, ...].\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "open_validation_asset_uploadArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "``upload_session_id`` is what the model polls\n``get_validation_upload_status`` with — the panel tags every file it\nstages with this same id, so the model never has to wait on a host-pushed\nchat turn to learn what was uploaded.",
+                  "properties": {
+                    "message": {
+                      "title": "Message",
+                      "type": "string"
+                    },
+                    "upload_session_id": {
+                      "title": "Upload Session Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "upload_session_id"
+                  ],
+                  "title": "OpenValidationAssetUploadResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/prepare_validation_asset_upload": {
+      "post": {
+        "operationId": "prepare_validation_asset_upload",
+        "summary": "Prepare to validate a LOCAL file with ABI Validate (Adobe",
+        "description": "Prepare to validate a LOCAL file with ABI Validate (Adobe\n            Brand Intelligence). This is the DEFAULT for a local file once\n            you already have its exact path (the user typed or pasted it) —\n            prefer this over open_validation_asset_upload's drag-and-drop\n            panel in that case, on any host: asking the user to re-drag a\n            file whose path they already gave you is redundant. For a\n            public URL or presigned URL, pass it straight to validate_asset\n            instead.\n\n            Inputs: local_path (used only to build the command — the server\n            never reads your disk) and content_type.\n            Returns: an upload ticket with a ready-to-run upload_command.\n            Next: run upload_command locally, confirm it exits 0 (a nonzero\n            exit means the PUT failed — do not proceed), then pass the\n            returned asset_id to validate_asset as one entry in assets:\n            {source: \"blob\", asset_id, media_type, asset_name}.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "local_path": {
+                    "title": "Local Path",
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "title": "Content Type",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "local_path",
+                  "content_type"
+                ],
+                "title": "prepare_validation_asset_uploadArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "A presigned upload target + a ready-to-run command for a Validate asset.\n\nRun ``upload_command`` locally and confirm it exits 0, then pass\n``asset_id`` to validate_asset as\n``{source: \"blob\", asset_id, media_type, asset_name}``. If ``expires_at``\nlapses first, re-mint via prepare_validation_asset_upload.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "upload_url": {
+                      "title": "Upload Url",
+                      "type": "string"
+                    },
+                    "content_type": {
+                      "title": "Content Type",
+                      "type": "string"
+                    },
+                    "upload_command": {
+                      "title": "Upload Command",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Expires At"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "upload_url",
+                    "content_type",
+                    "upload_command"
+                  ],
+                  "title": "ValidationAssetUploadTicket",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/validate_asset": {
+      "post": {
+        "operationId": "validate_asset",
+        "summary": "Start an ABI Validate (Adobe Brand Intelligence) brand-",
+        "description": "Start an ABI Validate (Adobe Brand Intelligence) brand-\n            compliance validation invocation for one or more creative assets.\n\n            Bulk by design: pass every asset the user wants checked in ONE\n            call's assets list — never call this once per asset. Use\n            get_validation_options first if the asset input shape is unfamiliar.\n\n            Inputs: a ValidateAssetRequest — assets: a list of one or more,\n            each one of {source: \"web\", media_type, value, asset_name} for an\n            already-reachable (or presigned) URL, or {source: \"blob\",\n            asset_id, media_type, asset_name} for a file staged via\n            prepare_validation_asset_upload / open_validation_asset_upload /\n            upload_validation_asset_bytes. Optional campaign_id — omit it\n            unless the user has one to give you; if the tenant requires an\n            explicit one, the call fails with a clear error naming what's\n            missing rather than guessing.\n            Returns: invocation_id and item_count.\n            Next: automatically poll get_validation_status yourself,\n            repeatedly and silently, until the invocation's status is\n            completed or failed — do not narrate each check in the chat.\n            \"Poll\" means call get_validation_status again yourself, each\n            time — never a shell command, sleep loop, or reading a cached\n            tool-result file off disk; none of those re-run the tool, so\n            none of them can ever see a status change. Some hosts also draw\n            a progress panel; it is a decorative visual for the user and\n            hands you nothing, so never wait on it instead of polling. Once\n            terminal, call get_validation_result exactly once for the full\n            per-item report, then stop — do not poll again for this\n            invocation afterward.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request": {
+                    "$ref": "#/components/schemas/ValidateAssetRequest"
+                  }
+                },
+                "required": [
+                  "request"
+                ],
+                "title": "validate_assetArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "validate_asset result. ``invocation_id`` is the one id to poll with —\nthe model is always the one to track and report the run (see\nget_validation_status / get_validation_result); a progress panel, when a\nhost renders one, is a decorative visual only and never a substitute for\npolling.",
+                  "properties": {
+                    "invocation_id": {
+                      "title": "Invocation Id",
+                      "type": "string"
+                    },
+                    "item_count": {
+                      "title": "Item Count",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "invocation_id",
+                    "item_count"
+                  ],
+                  "title": "ValidateAssetResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttributionSummary": {
+        "description": "A pointer either into the validated asset itself (asset attribution)\nor into a brand-guideline document (corpus attribution — carries\npresigned read URLs so a client can jump to the source).",
+        "properties": {
+          "attribution_id": {
+            "title": "Attribution Id",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "document_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Document Url"
+          },
+          "chunk_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Chunk Url"
+          },
+          "guideline_section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Guideline Section"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Page"
+          },
+          "regions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RegionSummary"
+            },
+            "title": "Regions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "attribution_id",
+          "document_id"
+        ],
+        "title": "AttributionSummary",
+        "type": "object"
+      },
+      "BoundingBoxCoords": {
+        "description": "A bounding box on the asset, normalized to 0-1 (the backend's region\nmodel — independent of the asset's actual pixel dimensions, so the client\nonly needs the rendered image's own box).",
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          },
+          "width": {
+            "title": "Width",
+            "type": "number"
+          },
+          "height": {
+            "title": "Height",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "BoundingBoxCoords",
+        "type": "object"
+      },
+      "RegionSummary": {
+        "description": "Where a violation was found on the asset, if the backend attributed\nit to a specific region.",
+        "properties": {
+          "region_type": {
+            "title": "Region Type",
+            "type": "string"
+          },
+          "bounding_box": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BoundingBoxCoords"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "region_type"
+        ],
+        "title": "RegionSummary",
+        "type": "object"
+      },
+      "ValidationItemResult": {
+        "description": "One item's full result: status, summary, violations, and the asset\nimage for rendering (mirrors the asset as validated, not a fresh fetch).",
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "item_name": {
+            "title": "Item Name",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Summary"
+          },
+          "violations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ViolationSummary"
+            },
+            "title": "Violations",
+            "type": "array"
+          },
+          "asset_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Url"
+          },
+          "asset_data_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Data Url"
+          }
+        },
+        "required": [
+          "item_id",
+          "status",
+          "item_name",
+          "media_type"
+        ],
+        "title": "ValidationItemResult",
+        "type": "object"
+      },
+      "ViolationSummary": {
+        "description": "One brand-guideline violation found on an item.",
+        "properties": {
+          "violation_id": {
+            "title": "Violation Id",
+            "type": "string"
+          },
+          "violation_summary": {
+            "title": "Violation Summary",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Severity"
+          },
+          "guideline_section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Guideline Section"
+          },
+          "focus_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Focus Area"
+          },
+          "accepted": {
+            "default": false,
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "rejected": {
+            "default": false,
+            "title": "Rejected",
+            "type": "boolean"
+          },
+          "asset_attributions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AttributionSummary"
+            },
+            "title": "Asset Attributions",
+            "type": "array"
+          },
+          "corpus_attributions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AttributionSummary"
+            },
+            "title": "Corpus Attributions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "violation_id",
+          "violation_summary",
+          "source"
+        ],
+        "title": "ViolationSummary",
+        "type": "object"
+      },
+      "ValidationItemStatus": {
+        "description": "One item's cheap status summary — no violations, no full-resolution\nimage. ``thumbnail_url`` is a small preview only, already present on the\nraw item-summary response at no extra cost. ``thumbnail_data_url`` is\nthat same thumbnail fetched server-side and embedded as a data URL, same\ntrick as get_validation_result's ``asset_data_url`` — a plain remote\n``thumbnail_url`` gets blocked by the panel's iframe CSP the same way, so\nthe panel prefers this field and falls back to a glyph placeholder only\nwhen it's None (fetch failed, oversize, or not an image). The full-\nresolution asset (rendition preferred) is still get_validation_result's\njob — this is thumbnail-sized only.",
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "item_name": {
+            "title": "Item Name",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "violation_count": {
+            "title": "Violation Count",
+            "type": "integer"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Thumbnail Url"
+          },
+          "thumbnail_data_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Thumbnail Data Url"
+          }
+        },
+        "required": [
+          "item_id",
+          "status",
+          "item_name",
+          "media_type",
+          "violation_count"
+        ],
+        "title": "ValidationItemStatus",
+        "type": "object"
+      },
+      "StagedUploadAssetSummary": {
+        "description": "One file staged through the upload panel — the exact shape\n``validate_asset`` expects for a ``source: \"blob\"`` asset entry.",
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "asset_name": {
+            "title": "Asset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "media_type",
+          "asset_name"
+        ],
+        "title": "StagedUploadAssetSummary",
+        "type": "object"
+      },
+      "BlobAssetInput": {
+        "additionalProperties": false,
+        "description": "An asset staged via prepare_validation_asset_upload /\nupload_validation_asset_bytes, referenced by its asset_id.",
+        "properties": {
+          "source": {
+            "const": "blob",
+            "default": "blob",
+            "title": "Source",
+            "type": "string"
+          },
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "asset_name": {
+            "title": "Asset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "media_type",
+          "asset_name"
+        ],
+        "title": "BlobAssetInput",
+        "type": "object"
+      },
+      "ValidateAssetRequest": {
+        "additionalProperties": false,
+        "description": "Everything validate_asset needs to start a bulk validation invocation.",
+        "properties": {
+          "assets": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "blob": "#/components/schemas/BlobAssetInput",
+                  "web": "#/components/schemas/WebAssetInput"
+                },
+                "propertyName": "source"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WebAssetInput"
+                },
+                {
+                  "$ref": "#/components/schemas/BlobAssetInput"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Assets",
+            "type": "array"
+          },
+          "campaign_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Campaign Id"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Display Name"
+          }
+        },
+        "required": [
+          "assets"
+        ],
+        "title": "ValidateAssetRequest",
+        "type": "object"
+      },
+      "WebAssetInput": {
+        "additionalProperties": false,
+        "description": "A public or presigned http(s) URL the backend fetches directly.",
+        "properties": {
+          "source": {
+            "const": "web",
+            "default": "web",
+            "title": "Source",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "asset_name": {
+            "title": "Asset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "media_type",
+          "value",
+          "asset_name"
+        ],
+        "title": "WebAssetInput",
+        "type": "object"
+      }
+    }
+  }
+}

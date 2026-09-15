@@ -11,6 +11,7 @@ These guides walk you through everything you need to integrate with the Adobe Br
 |-------|-------------|
 | [Authentication](authentication/index.md) | Set up OAuth credentials and generate an access token. |
 | [Core Concepts](core-concepts/index.md) | Key concepts: async invocations, validation results, and the resource model. |
+| [MCP Integration](mcp-integration/index.md) | Integrate ABI Validate into your own chat assistant via its MCP server. |
 | [Quickstart](quickstart/index.md) | Submit your first validation invocation end to end. |
 | [Review Feedback](review-feedback/index.md) | Attach and manage reviewer feedback on validation results. |
 | [Using Postman](using-postman/index.md) | Explore and test the API using Postman. |
