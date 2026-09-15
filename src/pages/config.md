@@ -6,12 +6,14 @@
     - [Guides](/guides/index.md)
     - API Reference
         - [Brand Intelligence API](/api/index.md)
+        - [MCP Tools](/api/mcp/index.md)
     - [Support](/support/index.md)
 
 - subPages:
     - [Guides](/guides/index.md)
         - [Authentication](/guides/authentication/index.md)
         - [Core Concepts](/guides/core-concepts/index.md)
+        - [MCP Integration](/guides/mcp-integration/index.md)
         - [Quickstart](/guides/quickstart/index.md)
         - [Review Feedback](/guides/review-feedback/index.md)
         - [Using Postman](/guides/using-postman/index.md)
