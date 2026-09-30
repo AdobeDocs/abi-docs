@@ -1,5 +1,5 @@
 ---
-title: ABI Validate MCP Tools Reference
+title: Brand Intelligence Validate MCP Tools Reference
 description: OpenAPI-format reference for the Adobe Brand Intelligence Validate MCP tools.
 layout: none
 hideBreadcrumbNav: true

@@ -7,14 +7,14 @@ description: Key concepts for integrating with the Adobe Brand Intelligence API.
 
 ## What Brand Intelligence does
 
-Adobe Brand Intelligence (ABI) validates creative assets against your organization's brand guidelines. You submit assets - images, documents, layouts - and ABI checks each one against a set of brand rules (colour palette, typography, logo usage, and so on). For each asset, ABI returns a list of violations with severity levels and human-readable messages.
+Adobe Brand Intelligence validates creative assets against your organization's brand guidelines. You submit assets - images, documents, layouts - and Brand Intelligence checks each one against a set of brand rules (colour palette, typography, logo usage, and so on). For each asset, Brand Intelligence returns a list of violations with severity levels and human-readable messages.
 
 Validation runs against **organization-level brand guidelines** and optionally against **campaign-specific guidelines** when a `campaignId` is provided.
 
 
 ## Async invocation model
 
-Validation is asynchronous. You submit a batch of items and receive an `invocationId` immediately; ABI processes each item in the background and you poll for results.
+Validation is asynchronous. You submit a batch of items and receive an `invocationId` immediately; Brand Intelligence processes each item in the background and you poll for results.
 
 ```
 POST /api/abi/skills/ra                     → 202 Accepted  { invocationId }
@@ -27,9 +27,9 @@ This design keeps the API responsive for large batches.
 
 ## Asset sources
 
-Each item you submit declares an `itemSource` telling ABI where to read the asset from:
+Each item you submit declares an `itemSource` telling Brand Intelligence where to read the asset from:
 
-- **`blob`** - the asset lives in ABI's own storage. Upload it first via `POST /api/abi/storage/temp`, then reference the returned `itemId` as the item's `sourceRef`. See [Quickstart](../quickstart/index.md) for the full upload flow.
+- **`blob`** - the asset lives in Brand Intelligence's own storage. Upload it first via `POST /api/abi/storage/temp`, then reference the returned `itemId` as the item's `sourceRef`. See [Quickstart](../quickstart/index.md) for the full upload flow.
 - **`web`** - the asset is already reachable at a public URL. Set `sourceRef` to that URL directly; no upload step is needed.
 
 
