@@ -19,7 +19,7 @@ This guide walks you through the complete validation flow - from getting an acce
 
 The Brand Intelligence API is asynchronous. You submit an invocation, receive an `invocationId`, poll until the invocation completes, then fetch per-asset results.
 
-![ABI Sequence Diagram](images/abi-flow.png)
+![Brand Intelligence Sequence Diagram](images/abi-flow.png)
 
 
 ## Step 1 - Get an access token
@@ -53,7 +53,7 @@ Tokens are valid for 24 hours (`expires_in: 86399`). Refresh before expiry to av
 
 ## Step 2 - Upload your assets
 
-ABI validates assets that live in its own storage - you upload each asset first and reference it by the returned `itemId` when you submit the invocation.
+Brand Intelligence validates assets that live in its own storage - you upload each asset first and reference it by the returned `itemId` when you submit the invocation.
 
 For each asset, request an upload slot:
 

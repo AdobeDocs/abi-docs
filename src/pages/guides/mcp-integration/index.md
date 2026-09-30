@@ -5,7 +5,7 @@ description: Integrate Adobe Brand Intelligence Validate into your own chat assi
 
 # MCP Integration
 
-This guide is for teams integrating **Adobe Brand Intelligence (ABI) Validate** into their own chat assistant via its MCP (Model Context Protocol) server.
+This guide is for teams integrating **Adobe Brand Intelligence Validate** into their own chat assistant via its MCP (Model Context Protocol) server.
 
 ## 1. Connecting
 
