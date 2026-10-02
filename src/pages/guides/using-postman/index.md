@@ -25,6 +25,7 @@ Create a new environment in Postman with the following variables:
 | `client_secret` | *(your Client Secret)* | From Adobe Developer Console - mark as **secret** |
 | `access_token` | *(leave blank)* | Populated automatically in Step 2 |
 | `tenant_id` | *(your Tenant ID)* | Required on every invocation |
+| `item_id` | *(leave blank)* | Populated in Step 4 for each uploaded asset |
 | `invocation_id` | *(leave blank)* | Populated as you work through invocations |
 
 <InlineAlert variant="warning" slots="text"/>
@@ -68,7 +69,39 @@ You can import the Brand Intelligence OpenAPI spec directly into Postman to auto
 4. Set the collection's **Authorization** to **Bearer Token** and set the token value to `{{access_token}}`.
 
 
-## Step 4 - Submit a validation invocation
+## Step 4 - Upload your asset
+
+Brand Intelligence validates assets that live in its own storage - upload each asset first and reference it by the returned `itemId` when you submit the invocation.
+
+**Request an upload slot.** Create a **POST** request:
+
+- **URL:** `{{base_url}}/api/abi/storage/temp`
+- **Authorization:** Bearer Token → `{{access_token}}`
+- **Body** (raw JSON):
+
+```json
+{
+  "tenantId": "{{tenant_id}}"
+}
+```
+
+The response (`201 Created`) includes an `itemId` and an `uploadUrl`. Copy the `itemId` into your `item_id` environment variable.
+
+**Upload the bytes.** Create a **PUT** request:
+
+- **URL:** the `uploadUrl` from the previous response
+- **Authorization:** No Auth (the URL already carries a SAS token)
+- **Headers:** `x-ms-blob-type: BlockBlob`
+- **Body:** **binary**, then select your asset file
+
+`uploadUrl` expires one hour after it's issued - upload promptly. Repeat this step once per asset.
+
+<InlineAlert variant="info" slots="text"/>
+
+Assets already reachable on the public web don't need this step - set `itemSource` to `web` and `sourceRef` to the asset URL in Step 5 instead.
+
+
+## Step 5 - Submit a validation invocation
 
 Create a **POST** request:
 
@@ -83,7 +116,7 @@ Create a **POST** request:
   "items": [
     {
       "itemSource": "blob",
-      "sourceRef": "<publicly accessible asset URL>",
+      "sourceRef": "{{item_id}}",
       "mediaType": "image/png",
       "itemName": "asset-01"
     }
@@ -91,10 +124,12 @@ Create a **POST** request:
 }
 ```
 
+For an uploaded asset, `itemSource` is `blob` and `sourceRef` is the `itemId` from Step 4. For a public URL, use `"itemSource": "web"` and `"sourceRef": "<asset URL>"`.
+
 The response includes an `invocationId`. Copy it into your `invocation_id` environment variable.
 
 
-## Step 5 - Poll and retrieve results
+## Step 6 - Poll and retrieve results
 
 **Poll invocation status:**
 
