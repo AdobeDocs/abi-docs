@@ -67,7 +67,7 @@ curl --request GET \
 }
 ```
 
-Each violation may also include `assetAttributions` and `corpusAttributions` linking back to the specific regions in the asset and the guideline chunks that informed the finding. `reviewStatus` is `null` until a reviewer accepts or rejects the violation. See the [API Reference](../../api/index.md) for the full `RaItemViolation` schema.
+Each violation may also include `assetAttributions` and `corpusAttributions` linking back to the specific regions in the asset and the guideline chunks that informed the finding. `reviewStatus` is `null` until a reviewer accepts or rejects the violation. See the [API Reference](../api/rest/index.md) for the full `RaItemViolation` schema.
 
 
 ## Add a violation
@@ -154,5 +154,5 @@ curl --request PATCH \
 
 ## What's next
 
-- See the full schema for violations in the [API Reference](../../api/index.md).
+- See the full schema for violations in the [API Reference](../api/rest/index.md).
 - Return to [Core Concepts](../core-concepts/index.md) for an overview of the Invocation → Item → Violation hierarchy.
