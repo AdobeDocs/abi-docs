@@ -3,17 +3,17 @@
 
 - pages:
     - [Adobe Brand Intelligence APIs](/index.md)
-    - [Guides](/guides/index.md)
+    - [Validate](/validate/index.md)
     - API Reference
-        - [Brand Intelligence API](/api/index.md)
-        - [MCP Tools](/api/mcp/index.md)
+        - [Validate REST API](/validate/api/rest/index.md)
+        - [Validate MCP Tools](/validate/api/mcp/index.md)
     - [Support](/support/index.md)
 
 - subPages:
-    - [Guides](/guides/index.md)
-        - [Authentication](/guides/authentication/index.md)
-        - [Core Concepts](/guides/core-concepts/index.md)
-        - [MCP Integration](/guides/mcp-integration/index.md)
-        - [Quickstart](/guides/quickstart/index.md)
-        - [Review Feedback](/guides/review-feedback/index.md)
-        - [Using Postman](/guides/using-postman/index.md)
+    - [Validate](/validate/index.md)
+        - [Core Concepts](/validate/core-concepts/index.md)
+        - [Authentication](/validate/authentication/index.md)
+        - [Using MCP](/validate/using-mcp/index.md)
+        - [Using Postman](/validate/using-postman/index.md)
+        - [Using curl](/validate/using-curl/index.md)
+        - [Review Feedback](/validate/review-feedback/index.md)

@@ -1,9 +1,9 @@
 ---
-title: Quickstart - Brand Intelligence
+title: Using curl - Brand Intelligence Validate
 description: Submit your first asset validation invocation using the Adobe Brand Intelligence API.
 ---
 
-# Quickstart
+# Using curl
 
 This guide walks you through the complete validation flow - from getting an access token to reading per-asset results - using `curl`.
 
@@ -274,11 +274,11 @@ curl --request GET \
 }
 ```
 
-The response includes additional fields per item and per violation - see the [API Reference](../../api/index.md) for the full schema.
+The response includes additional fields per item and per violation - see the [API Reference](../api/rest/index.md) for the full schema.
 
 
 ## What's next
 
-- Explore all available endpoints in the [API Reference](../../api/index.md).
+- Explore all available endpoints in the [API Reference](../api/rest/index.md).
 - Learn how to [attach reviewer feedback](../review-feedback/index.md) to flagged assets.
 - Try the API interactively with [Postman](../using-postman/index.md).

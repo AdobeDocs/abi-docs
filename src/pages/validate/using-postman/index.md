@@ -63,7 +63,7 @@ Tokens are valid for 24 hours. Re-run this request when your token expires.
 
 You can import the Brand Intelligence OpenAPI spec directly into Postman to auto-generate a request collection:
 
-1. Open the [API Reference](../../api/index.md) page and use its **Download OpenAPI specification** link to save the spec file.
+1. Open the [API Reference](../api/rest/index.md) page and use its **Download OpenAPI specification** link to save the spec file.
 2. In Postman, select **Import** and choose the downloaded file.
 3. Postman will generate a collection with all available endpoints pre-populated.
 4. Set the collection's **Authorization** to **Bearer Token** and set the token value to `{{access_token}}`.
@@ -143,4 +143,4 @@ Repeat until `status` is `completed`, `failed`, or `cancelled`.
 - **GET** `{{base_url}}/api/abi/skills/ra/{{invocation_id}}/items`
 - **Authorization:** Bearer Token → `{{access_token}}`
 
-See the [Quickstart](../quickstart/index.md) for annotated example responses.
+See the [Using curl](../using-curl/index.md) for annotated example responses.
