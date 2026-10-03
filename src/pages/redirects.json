@@ -1,0 +1,116 @@
+{
+  "total": 27,
+  "offset": 0,
+  "limit": 27,
+  "data": [
+    {
+      "Source": "/adobe-brand-intelligence/guides",
+      "Destination": "/adobe-brand-intelligence/validate/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/",
+      "Destination": "/adobe-brand-intelligence/validate/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/index",
+      "Destination": "/adobe-brand-intelligence/validate/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/authentication",
+      "Destination": "/adobe-brand-intelligence/validate/authentication/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/authentication/",
+      "Destination": "/adobe-brand-intelligence/validate/authentication/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/authentication/index",
+      "Destination": "/adobe-brand-intelligence/validate/authentication/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/core-concepts",
+      "Destination": "/adobe-brand-intelligence/validate/core-concepts/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/core-concepts/",
+      "Destination": "/adobe-brand-intelligence/validate/core-concepts/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/core-concepts/index",
+      "Destination": "/adobe-brand-intelligence/validate/core-concepts/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/mcp-integration",
+      "Destination": "/adobe-brand-intelligence/validate/using-mcp/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/mcp-integration/",
+      "Destination": "/adobe-brand-intelligence/validate/using-mcp/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/mcp-integration/index",
+      "Destination": "/adobe-brand-intelligence/validate/using-mcp/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/quickstart",
+      "Destination": "/adobe-brand-intelligence/validate/using-curl/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/quickstart/",
+      "Destination": "/adobe-brand-intelligence/validate/using-curl/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/quickstart/index",
+      "Destination": "/adobe-brand-intelligence/validate/using-curl/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/using-postman",
+      "Destination": "/adobe-brand-intelligence/validate/using-postman/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/using-postman/",
+      "Destination": "/adobe-brand-intelligence/validate/using-postman/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/using-postman/index",
+      "Destination": "/adobe-brand-intelligence/validate/using-postman/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/review-feedback",
+      "Destination": "/adobe-brand-intelligence/validate/review-feedback/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/review-feedback/",
+      "Destination": "/adobe-brand-intelligence/validate/review-feedback/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/guides/review-feedback/index",
+      "Destination": "/adobe-brand-intelligence/validate/review-feedback/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api",
+      "Destination": "/adobe-brand-intelligence/validate/api/rest/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api/",
+      "Destination": "/adobe-brand-intelligence/validate/api/rest/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api/index",
+      "Destination": "/adobe-brand-intelligence/validate/api/rest/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api/mcp",
+      "Destination": "/adobe-brand-intelligence/validate/api/mcp/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api/mcp/",
+      "Destination": "/adobe-brand-intelligence/validate/api/mcp/"
+    },
+    {
+      "Source": "/adobe-brand-intelligence/api/mcp/index",
+      "Destination": "/adobe-brand-intelligence/validate/api/mcp/"
+    }
+  ],
+  ":type": "sheet"
+}

@@ -18,7 +18,7 @@ Adobe Brand Intelligence is an AI-powered brand compliance service for enterpris
 Use the Brand Intelligence API to:
 
 - **Validate assets in bulk** - submit a batch of assets and receive structured pass/fail feedback per asset.
-- **Manage review feedback** - attach structured violations to flagged assets and track reviewer acceptance or rejection. See [Review Feedback](guides/review-feedback/index.md).
+- **Manage review feedback** - attach structured violations to flagged assets and track reviewer acceptance or rejection. See [Review Feedback](validate/review-feedback/index.md).
 
 ## Discover
 
@@ -26,19 +26,19 @@ Use the Brand Intelligence API to:
 
 ### Get Started
 
-[Core Concepts](guides/core-concepts/index.md)
+[Core Concepts](validate/core-concepts/index.md)
 
 Understand the async invocation model, the Invocation → Items → Violations resource hierarchy, and how validation results are structured.
 
 <DiscoverBlock slots="link, text"/>
 
-[Authentication](guides/authentication/index.md)
+[Authentication](validate/authentication/index.md)
 
 Set up OAuth Server-to-Server credentials in Adobe Developer Console and generate your first access token.
 
 <DiscoverBlock slots="link, text"/>
 
-[Quickstart](guides/quickstart/index.md)
+[Using curl](validate/using-curl/index.md)
 
 Submit your first validation invocation and retrieve results with step-by-step `curl` examples.
 
@@ -46,6 +46,6 @@ Submit your first validation invocation and retrieve results with step-by-step `
 
 ### API Reference
 
-[Brand Intelligence API](api/index.md)
+[Brand Intelligence API](validate/api/rest/index.md)
 
 Full OpenAPI reference for the Validation endpoints.
