@@ -50,13 +50,13 @@ Submit your first validation invocation and retrieve results with step-by-step `
 
 ### Simulate
 
-[Simulate Core Concepts](simulate/core-concepts/index.md)
+[Core Concepts](simulate/core-concepts/index.md)
 
 Understand workspaces, templates, audiences, asset types, and the simulation lifecycle.
 
 <DiscoverBlock slots="link, text"/>
 
-[Simulate Using MCP](simulate/using-mcp/index.md)
+[Using MCP](simulate/using-mcp/index.md)
 
 Connect your chat assistant to the Simulate MCP server and run your first simulation.
 
