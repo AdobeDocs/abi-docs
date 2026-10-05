@@ -4,9 +4,11 @@
 - pages:
     - [Adobe Brand Intelligence APIs](/index.md)
     - [Validate](/validate/index.md)
+    - [Simulate](/simulate/index.md)
     - API Reference
         - [Validate REST API](/validate/api/rest/index.md)
         - [Validate MCP Tools](/validate/api/mcp/index.md)
+        - [Simulate MCP Tools](/simulate/api/mcp/index.md)
     - [Support](/support/index.md)
 
 - subPages:
@@ -17,3 +19,6 @@
         - [Using Postman](/validate/using-postman/index.md)
         - [Using curl](/validate/using-curl/index.md)
         - [Review Feedback](/validate/review-feedback/index.md)
+    - [Simulate](/simulate/index.md)
+        - [Core Concepts](/simulate/core-concepts/index.md)
+        - [Using MCP](/simulate/using-mcp/index.md)

@@ -1,0 +1,1314 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Adobe Brand Intelligence Simulate — MCP Tool Reference",
+    "version": "1.0.0",
+    "description": "The 8 Simulate MCP tools' request/response schemas. The internal tools `get_simulation_status` and `upload_asset_bytes` are excluded — they are called by the MCP-Apps progress and upload panels themselves, not by integrators. Adobe Brand Intelligence is an MCP server: every real call goes over a single JSON-RPC endpoint at /mcp, not per-tool HTTP routes. The per-tool `POST /tools/<name>` paths documented below are a DOCUMENTATION CONVENTION only — one synthetic operation per registered MCP tool, so a human reader can see each tool's request/response shape in a familiar OpenAPI/Swagger viewer. They are not callable HTTP routes: do not run client codegen against this document and expect the result to work against /mcp."
+  },
+  "paths": {
+    "/tools/initialize_simulate": {
+      "post": {
+        "operationId": "initialize_simulate",
+        "summary": "ONE-TIME setup for Adobe Brand Intelligence — run this once per machine, when",
+        "description": "ONE-TIME setup for Adobe Brand Intelligence — run this once per machine, when\n            the user first connects this server or asks to initialize / set up /\n            install / update Simulate (or its skill). It installs the\n            \"new-simulation\" skill locally. Not part of running a simulation, and\n            not needed again afterwards: to actually test something use\n            get_simulation_options / create_simulation / list_simulations.\n\n            The skill teaches you the full simulation workflow. This server is\n            remote and cannot write to the user's disk, so install it as a skill\n            for your own host however you normally would.\n\n            Inputs: none.\n            Returns: skill_name, skill_document (the full SKILL.md), and message\n            — a short line to show the user.\n            Next: install skill_document as the skill named skill_name. Write it\n            byte-for-byte, frontmatter included: a host ignores a skill file whose\n            YAML frontmatter is missing, so a reformatted or summarized copy\n            installs as an inert file with no visible error. Then report the\n            message to the user.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "initialize_simulateArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "The bundled skill's content, for the ASSISTANT to install.\n\nThe server cannot write to the user's disk, so there is no command to run\nhere — it returns the skill content, and the calling assistant writes the\nfile itself with its own file tools (it knows its own host's skills\ndirectory; the server does not). How to do that is spelled out in the\ntool's description rather than in the payload.",
+                  "properties": {
+                    "skill_name": {
+                      "description": "The skill's name, which is also its directory name.",
+                      "title": "Skill Name",
+                      "type": "string"
+                    },
+                    "skill_document": {
+                      "description": "The full SKILL.md content, verbatim including YAML frontmatter.",
+                      "title": "Skill Document",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "A short line to show the user. The install how-to is in this tool's description, not here.",
+                      "title": "Message",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "skill_name",
+                    "skill_document",
+                    "message"
+                  ],
+                  "title": "SimulateInitResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/list_workspaces": {
+      "post": {
+        "operationId": "list_workspaces",
+        "summary": "Run or browse in the Adobe Brand Intelligence workspace — call this to get a",
+        "description": "Run or browse in the Adobe Brand Intelligence workspace — call this to get a\n            workspace_id before creating or listing simulations. Pick the\n            workspace yourself: default to the one flagged is_active (the\n            workspace the user's Adobe Brand Intelligence app currently has open) — do NOT\n            ask the user to choose. Only ask, or switch to a different one,\n            when the user names a specific workspace or asks to switch.\n\n            These tools ARE the Adobe Brand Intelligence app — operate it directly through them.\n            When the user says \"in / on the Adobe Brand Intelligence app\" (or \"the simulate\n            app\"), that is a request to use these tools, not to open a browser: do\n            NOT launch a web browser or computer-use to drive the Adobe Brand Intelligence web\n            UI. Use these tools instead.\n\n            Returns: every workspace you can access, with its workspace id,\n            name, kind (\"personal\" | \"shared\"), and is_active (True for the\n            one to default to). Show the user the workspace name — keep\n            workspace_id for the tool calls, don't surface it. Next: pass the\n            chosen workspace_id explicitly to create_simulation,\n            list_simulations, and get_simulation.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "list_workspacesArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "``list_workspaces`` result — a top-level object, not a bare array.",
+                  "properties": {
+                    "workspaces": {
+                      "items": {
+                        "$ref": "#/components/schemas/WorkspaceItem"
+                      },
+                      "title": "Workspaces",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "workspaces"
+                  ],
+                  "title": "ListWorkspacesResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/get_simulation_options": {
+      "post": {
+        "operationId": "get_simulation_options",
+        "summary": "The menu for a new simulation. Call this when you reach the",
+        "description": "The menu for a new simulation. Call this when you reach the\n            TEMPLATE decision — whenever the user wants to run, test, evaluate,\n            or compare anything with an audience (\"run a simulation\", \"test 3\n            names\", \"compare these taglines\", \"which option best fits the\n            brand\", \"how will the audience react\", \"test two emails on the\n            simulate app\"). It lists the building blocks for the run;\n            create_simulation cannot be called until you have.\n\n            A simulation needs FOUR DECISIONS, settled in order: objective,\n            assets, template, audience and participants. Ask ONE QUESTION AT A\n            TIME, always offering options, and resolve a decision from what the\n            user already said rather than asking when their ask already answers\n            it. This tool serves the last two decisions (template, audience) —\n            the objective and the assets come from the conversation, so do not\n            wait on this call to start.\n\n            This also covers asking-the-audience phrasings that never say\n            \"simulate\": \"which of these emails works better\", \"will this land\n            with my customers\", \"gut-check this before it goes live\", \"how would\n            our audience react\", \"review/compare these creatives\", \"be honest,\n            does this feel generic\". And role-play framings — \"be the voice of\n            the customer/consumer and tell me...\", \"be the customer in the room\",\n            \"you are my Basics segment, which do you prefer\". Those are NOT\n            requests for your own opinion: do not answer them from your own\n            judgment, do not invent ratings or scores, and do not rewrite the\n            user's copy. Start here and let the synthetic audience be that voice.\n\n            This IS how you run something in the Adobe Brand Intelligence app — call it\n            directly. Do NOT open a web browser or computer-use to drive the Adobe Brand Intelligence\n            Simulate web UI, even when the user says \"in / on the simulate app\";\n            that phrasing means use this tool, not browse a page.\n\n            Inputs: none.\n            Returns: study templates (each with a title, a description, allowed\n            design types, key questions, dimensions, and form defaults) plus the\n            populations + segments you can target. When you show the user\n            templates to choose from, give each one's title AND its description\n            — the description is what says what the template measures, so a bare\n            list of titles is not enough. Populations and segments are presented\n            by name. Keep every id in context to pass to create_simulation.\n            Next: pass a template_id, population_id, and segment_id(s) to\n            create_simulation.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "get_simulation_optionsArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "get_simulation_options result — every choice a run needs.",
+                  "properties": {
+                    "templates": {
+                      "items": {
+                        "$ref": "#/components/schemas/TemplateOption"
+                      },
+                      "title": "Templates",
+                      "type": "array"
+                    },
+                    "populations": {
+                      "items": {
+                        "$ref": "#/components/schemas/PopulationOption"
+                      },
+                      "title": "Populations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "templates",
+                    "populations"
+                  ],
+                  "title": "SimulationOptions",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/open_asset_upload": {
+      "post": {
+        "operationId": "open_asset_upload",
+        "summary": "The DEFAULT, primary way to collect LOCAL binary files (images,",
+        "description": "The DEFAULT, primary way to collect LOCAL binary files (images,\n            video, html, audio, or an email body image) for an Adobe Brand\n            Intelligence simulation, on ANY host — this is the tool to reach for\n            first, not a last resort. It opens an inline panel for the user to\n            pick files (drag-and-drop, multiple files); the bytes flow through\n            the MCP connection itself, so it works even where the host has no\n            shell or network egress. Use it whenever the user needs to supply a\n            local file with no public URL. Do NOT open it for a text asset or an\n            email's subject/preview — those are inline and never upload. Never\n            ask the user to run an upload command or paste asset JSON\n            themselves.\n\n            Inputs: none.\n            Returns: opens the panel; on a host that can't render it, returns\n            instructions to use prepare_asset_upload instead.\n            Next: after upload, pass the returned upload_id(s) to create_simulation\n            inside the asset — a media asset as\n            {type:\"image\", asset: {source:\"upload\", upload_id}}, or an email\n            body image as {type:\"email\", subject, body_image:\n            {source:\"upload\", upload_id}}. ``label`` is optional on every asset\n            — omit it and the server auto-numbers \"Option 1\", \"Option 2\", ...",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "title": "open_asset_uploadArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "This tool has no outputSchema — FastMCP returns unstructured text for it, not a structured JSON result."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/prepare_asset_upload": {
+      "post": {
+        "operationId": "prepare_asset_upload",
+        "summary": "FALLBACK for staging a LOCAL binary file (a media creative, or an",
+        "description": "FALLBACK for staging a LOCAL binary file (a media creative, or an\n            email body image) when open_asset_upload's panel cannot render on\n            the connected host. Prefer open_asset_upload otherwise — it works on\n            any host. Only reach for this tool when the host cannot show the\n            panel AND can run shell commands itself (it needs a shell and\n            network egress to run the returned upload command). Use this ONLY\n            for Adobe Brand Intelligence simulations, and only for a file on the\n            user's machine (for a public URL, pass it straight to\n            create_simulation instead). Do NOT use it for a text asset or an\n            email's subject/preview — those are inline and never upload.\n\n            Inputs: local_path (used only to build the command — the server never\n            reads your disk) and content_type.\n            Returns: an upload ticket with a ready-to-run upload_command.\n            Next: run upload_command locally, confirm it exits 0 (a nonzero exit\n            means the PUT failed — do not proceed), then pass the returned\n            upload_id to create_simulation inside the asset — a media asset as\n            {type:\"image\", asset: {source:\"upload\", upload_id}}, or an email\n            body image as {type:\"email\", subject, body_image:\n            {source:\"upload\", upload_id}}. ``label`` is optional on every asset\n            — omit it and the server auto-numbers \"Option 1\", \"Option 2\", ...",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "local_path": {
+                    "title": "Local Path",
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "title": "Content Type",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "local_path",
+                  "content_type"
+                ],
+                "title": "prepare_asset_uploadArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "A presigned upload target + a ready-to-run command.\n\nRun ``upload_command`` locally (when present) and confirm it exits 0, then pass ``upload_id``\nto create_simulation. If ``expires_at`` lapses first, re-mint via\nprepare_asset_upload.",
+                  "properties": {
+                    "upload_id": {
+                      "title": "Upload Id",
+                      "type": "string"
+                    },
+                    "upload_url": {
+                      "title": "Upload Url",
+                      "type": "string"
+                    },
+                    "content_type": {
+                      "title": "Content Type",
+                      "type": "string"
+                    },
+                    "upload_command": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Upload Command"
+                    },
+                    "expires_at": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Expires At"
+                    }
+                  },
+                  "required": [
+                    "upload_id",
+                    "upload_url",
+                    "content_type"
+                  ],
+                  "title": "AssetUploadTicket",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/create_simulation": {
+      "post": {
+        "operationId": "create_simulation",
+        "summary": "Launch a new simulation to test creatives against an audience.",
+        "description": "Launch a new simulation to test creatives against an audience.\n            Call this only AFTER the four decisions are settled and the user has\n            confirmed them — objective, assets, template, audience and\n            participants, worked ONE QUESTION AT A TIME (see\n            get_simulation_options). Use when the user wants to evaluate or test\n            something new — \"test this copy\", \"how will Gen-Z react to this\n            concept\", \"compare these three taglines\", \"run a study on this\n            headline\", \"set up a test for our new campaign\". This tool does not\n            collect the decisions; it launches what was already agreed.\n            Assets can be text, an email, or a media creative\n            (image/video/html/audio) — never silently skip a creative the user\n            gave you. An asset's TYPE follows what the user is testing, NOT the\n            uploaded file's format: when testing emails, an uploaded image is\n            that email's body_image (type \"email\"), not a standalone image\n            creative; only make an upload a standalone image when the user is\n            testing images. Each asset type attaches differently: a TEXT asset\n            is inline copy (no upload, no URL); an EMAIL asset has an inline subject +\n            optional preview text, and only its OPTIONAL body image carries bytes;\n            a MEDIA asset carries bytes from a public URL (passed straight in) or a\n            local file uploaded with prepare_asset_upload / open_asset_upload. Only\n            media assets and email body images ever use an upload or URL — do NOT\n            call the upload tools for a text asset or an email's subject/preview.\n            ALWAYS confirm the input summary with the user before launching —\n            an unconditional gate, every time, never skipped or shortened.\n            Show EXACTLY these 5 fields: objective, assets, template (its\n            title), segment(s) (by name), sample size (the participant\n            count). EXPLICITLY OMIT BOTH the population name AND the design\n            type (the server determines the design type from the asset\n            count). If the user asks to see the summary again, show the SAME\n            full 5-field plan, never a shorter one. A run consumes resources.\n            Call this ONLY after\n            list_workspaces and get_simulation_options — if you have not\n            fetched those yet, call them FIRST, then return here.\n            These are Adobe Brand Intelligence simulations.\n\n            Inputs: workspace_id is a TOP-LEVEL argument, NOT a field inside\n            request — every other field (template_id, name, population_id,\n            assets, ...) goes inside request, never beside it. request is a\n            SimulationRequest built from get_simulation_options ids.\n            Always pass workspace_id explicitly — from list_workspaces,\n            defaulting to the one flagged is_active unless the user named a\n            different workspace. If omitted it falls back to the active\n            workspace, but do not rely on that fallback — pass the id.\n            Each asset is a flat object tagged by \"type\" at the TOP LEVEL —\n            {\"type\": \"text\", \"content\": ...}, NOT nested as {\"type\": \"text\",\n            \"text\": {...}}. A text asset supplies inline \"content\"; an email\n            asset supplies \"subject\" (+ optional \"preview_text\") and an\n            optional \"body_image\"; a media asset (image/video/html/audio) supplies\n            an \"asset\" whose bytes come EITHER from a public url (source=\"url\") the\n            server fetches OR an upload_id (source=\"upload\") from\n            prepare_asset_upload / open_asset_upload for a local file. Where a\n            BinarySource applies (a media asset's \"asset\" or an email's\n            \"body_image\"), supplying both url and upload_id — or neither — is\n            rejected by the schema. \"label\" is OPTIONAL on every asset — omit it\n            and the server auto-numbers unlabeled assets \"Option 1\", \"Option 2\",\n            ... by position; only set it when you want a specific name shown.\n            Assets should be freshly provided for THIS\n            simulation — do not reuse a new asset id or url from a prior simulation\n            unless the user explicitly requests it. A comparative/sequential_monadic\n            design_type needs at least two assets to compare; with fewer, the\n            server launches a monadic design instead — mention this to the user\n            if they asked for a comparison with only one asset.\n            Returns: outcome=launched with the run's ids and webview_url, or\n            outcome=draft_incomplete with a webview_url to finish in the tile.\n            Next: on outcome=launched, poll get_simulation periodically until\n            status is resultsReady/archived AND summary_status is ready — a run\n            can reach resultsReady while its summary is still pending, so keep\n            polling — then report the executive summary.\n            You are the only reporter of results — poll every launch. Some hosts\n            also draw a progress panel; it is a decorative visual for the user\n            and hands you nothing, so never wait on it instead of polling. On\n            outcome=draft_incomplete, send the user to webview_url to finish in\n            the tile.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "request": {
+                    "$ref": "#/components/schemas/SimulationRequest"
+                  },
+                  "workspace_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Workspace Id"
+                  }
+                },
+                "required": [
+                  "request"
+                ],
+                "title": "create_simulationArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "create_simulation result.\n\n``outcome`` is ``launched`` when a run started, or ``draft_incomplete``\nwhen the study was created but a later step failed (the draft is resumable\nin the tile via ``webview_url``).",
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "launched",
+                        "draft_incomplete"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "simulation_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Simulation Id"
+                    },
+                    "workspace_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Workspace Id"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Status"
+                    },
+                    "webview_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Webview Url"
+                    },
+                    "failed_step": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "sampling_plan",
+                            "asset_upload",
+                            "interview_plan",
+                            "mark_in_review",
+                            "mark_ready",
+                            "create_run"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Failed Step"
+                    },
+                    "detail": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Detail"
+                    }
+                  },
+                  "required": [
+                    "outcome"
+                  ],
+                  "title": "CreateSimulationResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/list_simulations": {
+      "post": {
+        "operationId": "list_simulations",
+        "summary": "Browse or find the user's existing simulations and check their",
+        "description": "Browse or find the user's existing simulations and check their\n            status. Use when the user wants to see what they already have —\n            \"show me my simulations\", \"what studies do I have\", \"list my recent\n            runs\", \"find the one I set up last week\", \"is the C-Pro test done\n            yet\". This finds and lists simulations with their status only; it\n            does NOT read a simulation's findings (use get_simulation for\n            results) and does NOT start anything new (use create_simulation).\n            These are Adobe Brand Intelligence simulations.\n\n            This IS how you browse the Adobe Brand Intelligence app — call it directly. Do\n            NOT open a web browser or computer-use to view the Adobe Brand Intelligence web\n            UI, even when the user says \"in / on the simulate app\"; that phrasing\n            means use this tool.\n\n            Inputs: always pass workspace_id explicitly — from list_workspaces,\n            defaulting to the one flagged is_active unless the user named\n            a specific workspace or wants to see another. If omitted, this\n            falls back to listing the active workspace, but do not rely on\n            that fallback — pass the id explicitly.\n            Returns: the CURRENT set of simulations in the workspace — each\n            simulation's id, name, workspace id, run-aware status, and\n            last-updated time. A simulation not present here is not active\n            (e.g. archived or removed) — do not supplement this result with\n            previously-seen ids. Show the user the simulation name and\n            status; keep the ids for tool calls only.\n            Next: pass a simulation_id to get_simulation.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "workspace_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Workspace Id"
+                  }
+                },
+                "title": "list_simulationsArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "``list_simulations`` result — a top-level object, not a bare array.",
+                  "properties": {
+                    "simulations": {
+                      "items": {
+                        "$ref": "#/components/schemas/Simulation"
+                      },
+                      "title": "Simulations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "simulations"
+                  ],
+                  "title": "ListSimulationsResult",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/get_simulation": {
+      "post": {
+        "operationId": "get_simulation",
+        "summary": "Read and interpret the results of one specific simulation. Use",
+        "description": "Read and interpret the results of one specific simulation. Use\n            when the user asks about the findings of a simulation — \"how did\n            version B do\", \"what did the audience say about the C-Pro test\",\n            \"summarize the results of my last run\", \"show me the transcripts\",\n            \"which creative won\". First resolve WHICH simulation they mean: if\n            the reference is ambiguous or matches several, list candidates with\n            list_simulations and ask before reading. Read-only — this does not\n            start or change a run. Lead with the top-line summary and surface\n            confidence: if a result is low-confidence or the engine abstained,\n            say so plainly rather than presenting a score as certain. If the\n            simulation isn't finished, say it's still running rather than\n            reporting empty results. Also returns a link to open it in the\n            Adobe Brand Intelligence web app.\n\n            Inputs: workspace_id and simulation_id (both from list_simulations).\n            Returns: status, inputs, webview_url, and summary_status.\n            inputs describes what the simulation was configured with: objective,\n            design_type, participants (sample size), population and segments (by\n            name), dimensions being measured (by name), and uploaded assets\n            (label + type). Empty segments means the whole population; empty\n            dimensions means all scored dimensions; inputs fields are empty for a\n            draft that has not been fully configured yet.\n            summary_status is one of not_ready (no finished run yet), ready\n            (summary fetched), or pending (run finished but the summary isn't\n            available yet — retry shortly).\n            Next: if summary_status is pending, retry shortly; if ready, read\n            executive_summary.\n            ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "workspace_id": {
+                    "title": "Workspace Id",
+                    "type": "string"
+                  },
+                  "simulation_id": {
+                    "title": "Simulation Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "workspace_id",
+                  "simulation_id"
+                ],
+                "title": "get_simulationArguments",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful tool call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "``get_simulation`` result.\n\n``summary_status`` distinguishes the three valid states of the executive\nsummary: ``not_ready`` (no ready run yet), ``ready`` (fetched, possibly an\nempty summary), and ``pending`` (run is ready but the summary fetch failed\nand should be retried).",
+                  "properties": {
+                    "status": {
+                      "title": "Status",
+                      "type": "string"
+                    },
+                    "webview_url": {
+                      "title": "Webview Url",
+                      "type": "string"
+                    },
+                    "executive_summary": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ExecutiveSummary"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "analysis": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Analysis"
+                    },
+                    "summary_status": {
+                      "enum": [
+                        "not_ready",
+                        "ready",
+                        "pending"
+                      ],
+                      "title": "Summary Status",
+                      "type": "string"
+                    },
+                    "inputs": {
+                      "$ref": "#/components/schemas/SimulationInputs"
+                    },
+                    "thumbnails": {
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "stimulusId -> 1-hour presigned thumbnail URL. Empty dict when the study has no image stimuli or the fetch fails. Rides in structuredContent so the panel can build a thumbnailFor resolver. Each URL is itself a bearer capability (not just data) valid for 1 hour, and, like `analysis`, is serialized verbatim into the tool's model-facing text content on every get_simulation call — not only into the panel.",
+                      "title": "Thumbnails",
+                      "type": "object"
+                    },
+                    "contents": {
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "stimulusId -> the stimulus's own text content (the concept copy for text stimuli; empty for stimuli that carry no text, e.g. images). Empty dict on failure. Rides in structuredContent so the panel can build a contentFor resolver, and, like `thumbnails`/`analysis`, is also serialized into the tool's model-facing text content on every get_simulation call.",
+                      "title": "Contents",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "webview_url",
+                    "summary_status"
+                  ],
+                  "title": "SimulationDetail",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetInput": {
+        "description": "An uploaded asset (stimulus) as label + type.",
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "type"
+        ],
+        "title": "AssetInput",
+        "type": "object"
+      },
+      "EmailAsset": {
+        "additionalProperties": false,
+        "description": "An email stimulus. ``subject`` and ``preview_text`` are inline text (no\nupload). ``body_image`` is OPTIONAL and is the only part that carries bytes —\nsupply it (public url or a local-file upload_id) only when the email has a\nbody image; leave it out for a subject/preview-only email.",
+        "examples": [
+          {
+            "preview_text": "20% off everything this weekend",
+            "subject": "Your fall sale starts now",
+            "type": "email"
+          }
+        ],
+        "properties": {
+          "type": {
+            "const": "email",
+            "default": "email",
+            "title": "Type",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional short name shown for this creative in results (e.g. 'Version A'). Omit it — the server auto-numbers unlabeled assets as 'Option 1', 'Option 2', ... by their position in the assets list.",
+            "title": "Label"
+          },
+          "subject": {
+            "description": "Email subject line — inline text, required.",
+            "minLength": 1,
+            "title": "Subject",
+            "type": "string"
+          },
+          "preview_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional inbox preview/pre-header text — inline text, no upload.",
+            "title": "Preview Text"
+          },
+          "body_image": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "upload": "#/components/schemas/UploadSource",
+                    "url": "#/components/schemas/UrlSource"
+                  },
+                  "propertyName": "source"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/UrlSource"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UploadSource"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional email body image — the only part of an email that carries bytes. Public url, or an upload_id from prepare_asset_upload / open_asset_upload for a local file. Omit for a text-only email.",
+            "title": "Body Image"
+          }
+        },
+        "required": [
+          "subject"
+        ],
+        "title": "EmailAsset",
+        "type": "object"
+      },
+      "ExecutiveSummary": {
+        "description": "The ``{summary, recommendations}`` block from a finished run.",
+        "properties": {
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Summary"
+          },
+          "recommendations": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Recommendations",
+            "type": "array"
+          }
+        },
+        "title": "ExecutiveSummary",
+        "type": "object"
+      },
+      "MediaAsset": {
+        "additionalProperties": false,
+        "description": "A binary creative — image / video / html / audio. Its bytes come from a\n``BinarySource``: a public ``url`` the server fetches, or an ``upload`` staged\nfrom a local file via prepare_asset_upload / open_asset_upload. This is the\nonly TOP-LEVEL asset whose payload is binary; the only other bytes are an\n``EmailAsset``'s optional ``body_image``.",
+        "examples": [
+          {
+            "asset": {
+              "source": "url",
+              "url": "https://example.com/ad.png"
+            },
+            "type": "image"
+          }
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "image",
+              "video",
+              "html",
+              "audio"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional short name shown for this creative in results (e.g. 'Version A'). Omit it — the server auto-numbers unlabeled assets as 'Option 1', 'Option 2', ... by their position in the assets list.",
+            "title": "Label"
+          },
+          "asset": {
+            "description": "Where the creative's bytes come from — a public url the server fetches, or an upload_id for a local file staged via prepare_asset_upload / open_asset_upload.",
+            "discriminator": {
+              "mapping": {
+                "upload": "#/components/schemas/UploadSource",
+                "url": "#/components/schemas/UrlSource"
+              },
+              "propertyName": "source"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UrlSource"
+              },
+              {
+                "$ref": "#/components/schemas/UploadSource"
+              }
+            ],
+            "title": "Asset"
+          }
+        },
+        "required": [
+          "type",
+          "asset"
+        ],
+        "title": "MediaAsset",
+        "type": "object"
+      },
+      "NamedRef": {
+        "description": "An id paired with its resolved display name (``None`` when unresolved).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "NamedRef",
+        "type": "object"
+      },
+      "PopulationOption": {
+        "properties": {
+          "population_id": {
+            "title": "Population Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "segments": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SegmentOption"
+            },
+            "title": "Segments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "population_id",
+          "name"
+        ],
+        "title": "PopulationOption",
+        "type": "object"
+      },
+      "SegmentOption": {
+        "properties": {
+          "segment_id": {
+            "title": "Segment Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "segment_type": {
+            "title": "Segment Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segment_id",
+          "name",
+          "segment_type"
+        ],
+        "title": "SegmentOption",
+        "type": "object"
+      },
+      "Simulation": {
+        "description": "One simulation (backend ``study``) in a workspace listing.",
+        "properties": {
+          "simulation_id": {
+            "title": "Simulation Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "simulation_id",
+          "name",
+          "workspace_id",
+          "status",
+          "updated_at"
+        ],
+        "title": "Simulation",
+        "type": "object"
+      },
+      "SimulationInputs": {
+        "description": "What a simulation was configured with, in a legible (name-resolved) form.\n\nEmpty ``segments`` means the whole population is eligible; empty\n``dimensions`` means all of the questionnaire's scored dimensions. Fields\ndegrade to their default when the backing fetch is missing or fails.",
+        "properties": {
+          "objective": {
+            "default": "",
+            "title": "Objective",
+            "type": "string"
+          },
+          "design_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Design Type"
+          },
+          "participants": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Participants"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NamedRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "segments": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/NamedRef"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "dimensions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/NamedRef"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "assets": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AssetInput"
+            },
+            "title": "Assets",
+            "type": "array"
+          }
+        },
+        "title": "SimulationInputs",
+        "type": "object"
+      },
+      "SimulationRequest": {
+        "additionalProperties": false,
+        "description": "What the simulation is, after the user has confirmed inputs.\n\nWhich workspace it lands in is a separate top-level ``create_simulation``\nargument (optional — omitted means the caller's active workspace), matching\nlist_simulations / get_simulation.",
+        "properties": {
+          "template_id": {
+            "description": "Study template id from get_simulation_options.templates.",
+            "title": "Template Id",
+            "type": "string"
+          },
+          "questionnaire_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Explicit questionnaire id to measure against (from get_simulation_options / the list_questionnaires CLI). Omit to resolve from the template. Pass the tenant's full-coverage questionnaire to measure all its metrics.",
+            "title": "Questionnaire Id"
+          },
+          "name": {
+            "description": "Name for the simulation, shown to the user.",
+            "title": "Name",
+            "type": "string"
+          },
+          "objective": {
+            "default": "",
+            "description": "What the simulation should find out, in the user's own framing. Defaults to the template's objective when omitted.",
+            "title": "Objective",
+            "type": "string"
+          },
+          "population_id": {
+            "description": "Audience population id from get_simulation_options.populations.",
+            "title": "Population Id",
+            "type": "string"
+          },
+          "segment_ids": {
+            "default": [],
+            "description": "Segment ids to target within the population. EMPTY means the whole population — only leave it empty when the user wants everyone.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Segment Ids",
+            "type": "array"
+          },
+          "sample_size": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Number of simulated respondents. Omit to use the template's default; the user may ask for more or fewer.",
+            "title": "Sample Size"
+          },
+          "assets": {
+            "description": "The creatives to test — one tagged entry per stimulus the user gave you (text, email, or media). Never silently skip one.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "audio": "#/components/schemas/MediaAsset",
+                  "email": "#/components/schemas/EmailAsset",
+                  "html": "#/components/schemas/MediaAsset",
+                  "image": "#/components/schemas/MediaAsset",
+                  "text": "#/components/schemas/TextAsset",
+                  "video": "#/components/schemas/MediaAsset"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MediaAsset"
+                },
+                {
+                  "$ref": "#/components/schemas/TextAsset"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailAsset"
+                }
+              ]
+            },
+            "title": "Assets",
+            "type": "array"
+          },
+          "design_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "One of the template's allowed design types (e.g. 'monadic', 'sequential_monadic'). A comparative/sequential_monadic design needs at least two assets to compare; when fewer are supplied, the server uses a monadic design instead.",
+            "title": "Design Type"
+          },
+          "brand_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Brand the creatives belong to, when the user names one.",
+            "title": "Brand Name"
+          },
+          "run_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional label for this particular run of the simulation.",
+            "title": "Run Name"
+          }
+        },
+        "required": [
+          "template_id",
+          "name",
+          "population_id",
+          "assets"
+        ],
+        "title": "SimulationRequest",
+        "type": "object"
+      },
+      "TemplateOption": {
+        "properties": {
+          "template_id": {
+            "title": "Template Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "allowed_design_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Design Types",
+            "type": "array"
+          },
+          "key_questions": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Questions",
+            "type": "array"
+          },
+          "dimensions": {
+            "default": [],
+            "description": "Informational only — what this template measures, for showing the user. NOT an input to create_simulation; there is no dimensions field on its request.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "default_name": {
+            "title": "Default Name",
+            "type": "string"
+          },
+          "default_objective": {
+            "title": "Default Objective",
+            "type": "string"
+          },
+          "default_design_type": {
+            "title": "Default Design Type",
+            "type": "string"
+          },
+          "default_sample_size": {
+            "title": "Default Sample Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "template_id",
+          "title",
+          "description",
+          "allowed_design_types",
+          "default_name",
+          "default_objective",
+          "default_design_type",
+          "default_sample_size"
+        ],
+        "title": "TemplateOption",
+        "type": "object"
+      },
+      "TextAsset": {
+        "additionalProperties": false,
+        "description": "An inline text stimulus — plain copy, e.g. a headline or tagline. There is\nNO file and NO URL: put the text in ``content``. Never call\nprepare_asset_upload / open_asset_upload for a text asset.",
+        "examples": [
+          {
+            "content": "Unlimited Firefly generations",
+            "type": "text"
+          }
+        ],
+        "properties": {
+          "type": {
+            "const": "text",
+            "default": "text",
+            "title": "Type",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional short name shown for this creative in results (e.g. 'Version A'). Omit it — the server auto-numbers unlabeled assets as 'Option 1', 'Option 2', ... by their position in the assets list.",
+            "title": "Label"
+          },
+          "content": {
+            "description": "The text copy itself, inline — not a URL or file.",
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "TextAsset",
+        "type": "object"
+      },
+      "UploadSource": {
+        "additionalProperties": false,
+        "description": "Bytes the client already staged for a LOCAL file. Get the ``upload_id``\nfrom prepare_asset_upload (when you have a readable path) or open_asset_upload\n(when you do not) — never invent one.",
+        "properties": {
+          "source": {
+            "const": "upload",
+            "title": "Source",
+            "type": "string"
+          },
+          "upload_id": {
+            "description": "upload_id returned by prepare_asset_upload / open_asset_upload after the local file's bytes were staged.",
+            "minLength": 1,
+            "title": "Upload Id",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Ignored. Not required — the upload path only needs upload_id. Accepted because prepare_asset_upload's ticket returns content_type and callers naturally pass it through.",
+            "title": "Content Type"
+          }
+        },
+        "required": [
+          "source",
+          "upload_id"
+        ],
+        "title": "UploadSource",
+        "type": "object"
+      },
+      "UrlSource": {
+        "additionalProperties": false,
+        "description": "Bytes the server fetches over HTTPS — use for a creative that already\nlives at a public URL. No upload step: the server downloads it itself.",
+        "properties": {
+          "source": {
+            "const": "url",
+            "title": "Source",
+            "type": "string"
+          },
+          "url": {
+            "description": "Public HTTPS URL the server fetches the bytes from.",
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "url"
+        ],
+        "title": "UrlSource",
+        "type": "object"
+      },
+      "WorkspaceItem": {
+        "description": "One workspace in a ``list_workspaces`` listing.",
+        "properties": {
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          },
+          "workspace_name": {
+            "title": "Workspace Name",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "is_active": {
+            "default": false,
+            "title": "Is Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "workspace_name",
+          "kind"
+        ],
+        "title": "WorkspaceItem",
+        "type": "object"
+      }
+    }
+  }
+}
