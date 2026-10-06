@@ -64,10 +64,11 @@
     {
       "page": "/guides/mcp-integration/",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4",
         "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/15341452?v=4"
       ],
-      "lastUpdated": "9/30/2026"
+      "lastUpdated": "10/6/2026"
     },
     {
       "page": "/guides/quickstart/",
@@ -86,9 +87,10 @@
     {
       "page": "/guides/using-postman/",
       "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4",
         "https://avatars.githubusercontent.com/u/6939065?v=4"
       ],
-      "lastUpdated": "9/1/2026"
+      "lastUpdated": "10/6/2026"
     },
     {
       "page": "/support/",
