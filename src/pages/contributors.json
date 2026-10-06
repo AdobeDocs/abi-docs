@@ -1,7 +1,7 @@
 {
-  "total": 20,
+  "total": 24,
   "offset": 0,
-  "limit": 20,
+  "limit": 24,
   "data": [
     {
       "page": "/",
@@ -82,6 +82,34 @@
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4",
         "https://avatars.githubusercontent.com/u/6939065?v=4"
+      ],
+      "lastUpdated": "10/6/2026"
+    },
+    {
+      "page": "/simulate/",
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4"
+      ],
+      "lastUpdated": "10/6/2026"
+    },
+    {
+      "page": "/simulate/api/mcp/",
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4"
+      ],
+      "lastUpdated": "10/6/2026"
+    },
+    {
+      "page": "/simulate/core-concepts/",
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4"
+      ],
+      "lastUpdated": "10/6/2026"
+    },
+    {
+      "page": "/simulate/using-mcp/",
+      "avatars": [
+        "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
       "lastUpdated": "10/6/2026"
     },
