@@ -1,9 +1,9 @@
 ---
-title: MCP Integration - Brand Intelligence
+title: Using MCP - Brand Intelligence Validate
 description: Integrate Adobe Brand Intelligence Validate into your own chat assistant via its MCP server.
 ---
 
-# MCP Integration
+# Using MCP
 
 This guide is for teams integrating **Adobe Brand Intelligence Validate** into their own chat assistant via its MCP (Model Context Protocol) server.
 
@@ -125,7 +125,7 @@ route directly.
 
 ## 5. Reference
 
-The [MCP Tools Reference](../../api/mcp/index.md) is a machine-readable OpenAPI
+The [MCP Tools Reference](../api/mcp/index.md) is a machine-readable OpenAPI
 3.1 description of the 7 Validate tools' request/response schemas — useful
 for validating your own integration's shapes against the real contract. Its
 per-tool `POST /tools/<name>` paths are a documentation convention only, not

@@ -29,7 +29,7 @@ This design keeps the API responsive for large batches.
 
 Each item you submit declares an `itemSource` telling Brand Intelligence where to read the asset from:
 
-- **`blob`** - the asset lives in Brand Intelligence's own storage. Upload it first via `POST /api/abi/storage/temp`, then reference the returned `itemId` as the item's `sourceRef`. See [Quickstart](../quickstart/index.md) for the full upload flow.
+- **`blob`** - the asset lives in Brand Intelligence's own storage. Upload it first via `POST /api/abi/storage/temp`, then reference the returned `itemId` as the item's `sourceRef`. See [Using curl](../using-curl/index.md) for the full upload flow.
 - **`web`** - the asset is already reachable at a public URL. Set `sourceRef` to that URL directly; no upload step is needed.
 
 
@@ -93,7 +93,7 @@ Each item's detail (`GET /api/abi/skills/ra/{invocationId}/items/{itemId}`) cont
 
 An item with an empty `violations` array is fully compliant. See [Review Feedback](../review-feedback/index.md) for how to accept, reject, or add violations.
 
-See the [API Reference](../../api/index.md) for the full `RaItemViolation` schema.
+See the [API Reference](../api/rest/index.md) for the full `RaItemViolation` schema.
 
 
 ## Pagination
