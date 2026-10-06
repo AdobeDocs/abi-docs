@@ -52,18 +52,17 @@ This guide is for teams integrating **Adobe Brand Intelligence Validate** into t
 
 | Tool | Purpose | Key inputs | Key outputs |
 |---|---|---|---|
+| `initialize_validate` | One-time setup: returns the `validate-asset` Agent Skill for your host to install locally. Not part of running a validation. | none | `skill_name`, `skill_document` (the full `SKILL.md`), `message` |
 | `get_validation_options` | Discover the asset input shape (allowed `source` values, `media_type` guidance, the bulk `assets` list shape). | none | `source_types`, notes on media type / bulk shape |
-| `open_validation_asset_upload` | Opens an inline drag-and-drop upload panel — **only relevant if your host renders MCP-Apps UI panels; see Section 4.** | none | `message`, `upload_session_id` |
-| `get_validation_upload_status` | Poll target for the upload panel's completion. Call this yourself after `open_validation_asset_upload`, repeatedly, until `settled` is `true`. | `upload_session_id` | `settled: bool`, `assets: [{asset_id, media_type, asset_name}]` |
+| `open_validation_asset_upload` | Opens an inline drag-and-drop upload panel — **only relevant if your host renders MCP-Apps UI panels; see Section 4.** | none | `message` |
 | `prepare_validation_asset_upload` | Headless upload path for a local file whose path you already have: mints a presigned upload target + a ready-to-run upload command. | `local_path`, `content_type` | `asset_id`, `upload_command` (run it yourself, confirm exit code 0) |
 | `validate_asset` | Starts **one bulk invocation** covering one or more assets. | `assets: [{source: "web", media_type, value, asset_name} \| {source: "blob", asset_id, media_type, asset_name}, ...]`, optional `campaign_id` | `invocation_id`, `item_count` |
 | `get_validation_status` | Cheap poll target for an in-flight invocation — overall status plus a per-item status summary, no violations yet. | `invocation_id` | `status`, `item_count`, `success_count`, `failure_count`, per-item `items[]` |
-| `get_validation_result` | Full per-item report once the invocation is terminal — summary + every violation. Call once. | `invocation_id` | per-item `items[]`, each with `status`, `summary`, `violations[]`, `asset_url`/`asset_data_url` |
+| `get_validation_result` | Full per-item report once the invocation is terminal — summary + every violation. Call once. | `invocation_id` | per-item `items[]`, each with `status`, `summary`, `violations[]`, `asset_url` |
 
-`upload_validation_asset_bytes` and `finalize_validation_upload_session` are
-internal tools the upload panel itself calls — you won't call these directly
-unless you're also implementing an MCP-Apps-compatible upload panel of your
-own.
+`upload_validation_asset_bytes` is an internal tool the upload panel itself
+calls — you won't call it directly unless you're also implementing an
+MCP-Apps-compatible upload panel of your own.
 
 ## 3. How to drive the tools correctly
 
@@ -114,8 +113,7 @@ system prompt as needed, but keep the substance:
 `io.modelcontextprotocol/ui` MCP extension. **Most custom-built agent
 frameworks do not implement this extension.** If yours doesn't:
 
-- Skip `open_validation_asset_upload` and `get_validation_upload_status`
-  entirely.
+- Skip `open_validation_asset_upload` entirely.
 - Route every local-file upload through `prepare_validation_asset_upload`
   instead — it returns a ready-to-run upload command with no UI dependency.
 
@@ -133,7 +131,6 @@ for validating your own integration's shapes against the real contract. Its
 per-tool `POST /tools/<name>` paths are a documentation convention only, not
 callable routes — live traffic goes over MCP JSON-RPC at `/mcp`, not REST.
 
-Note: `upload_validation_asset_bytes` and `finalize_validation_upload_session`
-are intentionally absent from the OpenAPI — they are internal tools called by
-the MCP-Apps upload panel itself and are not part of the integrator-facing
-surface.
+Note: `upload_validation_asset_bytes` is intentionally absent from the
+OpenAPI — it is an internal tool called by the MCP-Apps upload panel itself
+and is not part of the integrator-facing surface.

@@ -3,7 +3,7 @@
   "info": {
     "title": "Adobe Brand Intelligence Validate — MCP Tool Reference",
     "version": "1.0.0",
-    "description": "The 7 Validate MCP tools' request/response schemas. The two internal upload-panel tools (`upload_validation_asset_bytes` and `finalize_validation_upload_session`) are excluded — they are called by the MCP-Apps upload panel itself, not by integrators. Adobe Brand Intelligence - Validate is an MCP server: every real call goes over a single JSON-RPC endpoint at /mcp, not per-tool HTTP routes. The per-tool `POST /tools/<name>` paths documented below are a DOCUMENTATION CONVENTION only — one synthetic operation per registered MCP tool, so a human reader can see each tool's request/response shape in a familiar OpenAPI/Swagger viewer. They are not callable HTTP routes: do not run client codegen against this document and expect the result to work against /mcp."
+    "description": "The 7 Validate MCP tools' request/response schemas. The internal upload-panel tool `upload_validation_asset_bytes` is excluded — it is called by the MCP-Apps upload panel itself, not by integrators. Adobe Brand Intelligence - Validate is an MCP server: every real call goes over a single JSON-RPC endpoint at /mcp, not per-tool HTTP routes. The per-tool `POST /tools/<name>` paths documented below are a DOCUMENTATION CONVENTION only — one synthetic operation per registered MCP tool, so a human reader can see each tool's request/response shape in a familiar OpenAPI/Swagger viewer. They are not callable HTTP routes: do not run client codegen against this document and expect the result to work against /mcp."
   },
   "paths": {
     "/tools/get_validation_options": {
@@ -43,7 +43,7 @@
                       "type": "array"
                     },
                     "source_type_note": {
-                      "default": "'web' is for a URL that renders as a page (Brand Intelligence screenshots it in a headless browser) — not for a direct-file or presigned URL (e.g. an image/PDF link, or a get_download_url result); those force a download and fail. 'blob' takes an `asset_id` staged via prepare_validation_asset_upload or upload_validation_asset_bytes — use 'blob' for any direct-file or presigned URL, pass the id straight through, no separate download-URL resolution step needed.",
+                      "default": "'web' takes a public or presigned http(s) URL directly in `value`. 'blob' takes an `asset_id` staged via prepare_validation_asset_upload or upload_validation_asset_bytes — pass the id straight through, no separate download-URL resolution step needed.",
                       "title": "Source Type Note",
                       "type": "string"
                     },
@@ -71,7 +71,7 @@
       "post": {
         "operationId": "get_validation_result",
         "summary": "Get a validation invocation's per-item results: each item's",
-        "description": "Get a validation invocation's per-item results: each item's\n            status, summary, and any brand-guideline violations found. Call\n            this to report a finished invocation — you are the only reporter\n            of results, so poll get_validation_status yourself until terminal,\n            then call this once.\n\n            Inputs: invocation_id (from validate_asset).\n            Returns: the invocation's overall status plus every item's full\n            result — item_id, status, summary, violations (empty means no\n            violations found for that item), and the asset image\n            (asset_url/asset_data_url).\n            Next: if the invocation is not yet terminal, poll\n            get_validation_status again shortly instead of calling this.\n            ",
+        "description": "Get a validation invocation's per-item results: each item's\n            status, summary, and any brand-guideline violations found. Call\n            this to report a finished invocation — you are the only reporter\n            of results, so poll get_validation_status yourself until terminal,\n            then call this once.\n\n            Inputs: invocation_id (from validate_asset).\n            Returns: the invocation's overall status plus every item's full\n            result — item_id, status, summary, violations (empty means no\n            violations found for that item), and the asset image (asset_url).\n            Next: if the invocation is not yet terminal, poll\n            get_validation_status again shortly instead of calling this.\n            ",
         "requestBody": {
           "required": true,
           "content": {
@@ -98,7 +98,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "get_validation_result result.\n\n``status`` mirrors the invocation's own lifecycle. ``items`` carries every\nitem's full per-item result — fetched in one call so the model never has\nto loop tool calls per item. ``asset_data_url`` is a same-origin ``data:``\nURI of each item's image, best-effort (``None`` on fetch failure, oversize,\nor a non-image asset) — prefer it over ``asset_url`` when rendering, since\na UI-capable host's iframe CSP commonly blocks a remote ``<img src>`` even\nwhen the URL itself is perfectly reachable.",
+                  "description": "get_validation_result result.\n\n``status`` mirrors the invocation's own lifecycle. ``items`` carries every\nitem's full per-item result — fetched in one call so the model never has\nto loop tool calls per item. ``asset_url`` is a plain remote URL to each\nitem's image; the validation-progress panel's CSP allowlists Adobe Brand Intelligence\nValidate's temp-asset storage origins so its ``<img src>`` can load it\ndirectly, no server-side fetch/base64-embed needed.",
                   "properties": {
                     "invocation_id": {
                       "title": "Invocation Id",
@@ -208,26 +208,18 @@
         }
       }
     },
-    "/tools/get_validation_upload_status": {
+    "/tools/initialize_validate": {
       "post": {
-        "operationId": "get_validation_upload_status",
-        "summary": "Poll this after open_validation_asset_upload instead of",
-        "description": "Poll this after open_validation_asset_upload instead of\n            waiting for a chat message from the panel — some hosts refuse to\n            let a widget send one. Poll silently, exactly like\n            get_validation_status, until settled is true. \"Poll\" means call\n            this tool again yourself, each time — never a shell command,\n            sleep loop, or reading a cached tool-result file off disk; none\n            of those re-run the tool, so none of them can ever see settled\n            flip to true.\n\n            Inputs: upload_session_id (from open_validation_asset_upload).\n            Returns: settled (false while the panel's batch is still\n            uploading) and assets (each staged file's asset_id, media_type,\n            asset_name — ready to pass straight to validate_asset).\n            Next: if settled is false, poll again shortly. Once true, use\n            assets for validate_asset; an empty list means every upload in\n            the batch failed.\n            ",
+        "operationId": "initialize_validate",
+        "summary": "ONE-TIME setup for Adobe Brand Intelligence —",
+        "description": "ONE-TIME setup for Adobe Brand Intelligence —\n            run this once per machine, when the user first connects this\n            server or asks to initialize / set up / install / update\n            Validate (or its skill). It installs the \"validate-asset\" skill\n            locally. Not part of running a validation, and not needed again\n            afterwards: to actually validate something use\n            get_validation_options / validate_asset / get_validation_result.\n\n            The skill teaches you the full validation workflow. This server\n            is remote and cannot write to the user's disk, so install it as\n            a skill for your own host however you normally would.\n\n            Inputs: none.\n            Returns: skill_name, skill_document (the full SKILL.md), and\n            message — a short line to show the user.\n            Next: install skill_document as the skill named skill_name.\n            Write it byte-for-byte, frontmatter included: a host ignores a\n            skill file whose YAML frontmatter is missing, so a reformatted\n            or summarized copy installs as an inert file with no visible\n            error. Then report the message to the user.\n            ",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "upload_session_id": {
-                    "title": "Upload Session Id",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "upload_session_id"
-                ],
-                "title": "get_validation_upload_statusArguments",
+                "properties": {},
+                "title": "initialize_validateArguments",
                 "type": "object"
               }
             }
@@ -239,25 +231,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "``settled`` is false until the panel's current upload batch finishes\n(``finalize_validation_upload_session``) — the model should keep polling\nuntil it flips true, then use ``assets`` for ``validate_asset``. An empty\n``assets`` list with ``settled: true`` means every file in the batch\nfailed to upload.",
+                  "description": "The bundled skill's content, for the ASSISTANT to install.\n\nThe server cannot write to the user's disk, so there is no command to run\nhere — it returns the skill content, and the calling assistant writes the\nfile itself with its own file tools (it knows its own host's skills\ndirectory; the server does not). How to do that is spelled out in the\ntool's description rather than in the payload.",
                   "properties": {
-                    "settled": {
-                      "title": "Settled",
-                      "type": "boolean"
+                    "skill_name": {
+                      "description": "The skill's name, which is also its directory name.",
+                      "title": "Skill Name",
+                      "type": "string"
                     },
-                    "assets": {
-                      "default": [],
-                      "items": {
-                        "$ref": "#/components/schemas/StagedUploadAssetSummary"
-                      },
-                      "title": "Assets",
-                      "type": "array"
+                    "skill_document": {
+                      "description": "The full SKILL.md content, verbatim including YAML frontmatter.",
+                      "title": "Skill Document",
+                      "type": "string"
+                    },
+                    "message": {
+                      "description": "A short line to show the user. The install how-to is in this tool's description, not here.",
+                      "title": "Message",
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "settled"
+                    "skill_name",
+                    "skill_document",
+                    "message"
                   ],
-                  "title": "ValidationUploadStatus",
+                  "title": "ValidateInitResult",
                   "type": "object"
                 }
               }
@@ -270,7 +267,7 @@
       "post": {
         "operationId": "open_validation_asset_upload",
         "summary": "Open an inline panel to upload LOCAL creative files for Brand Intelligence",
-        "description": "Open an inline panel to upload LOCAL creative files for Brand Intelligence\n            brand-compliance validation\n            (drag-and-drop, multiple files — they'll all validate together in\n            one bulk invocation). DEFAULT to this whenever the user hasn't\n            given an asset yet — no URL, no path, no attachment in their\n            message, even a bare \"validate this\" — open the panel\n            immediately rather than asking a text question first. If they\n            already gave a concrete local path, call\n            prepare_validation_asset_upload directly instead — do not open\n            this panel just to ask the user to re-drag a file whose path\n            they already gave you. Never ask the user to paste asset JSON\n            themselves.\n\n            Inputs: none.\n            Returns: opens the panel, plus an upload_session_id. Once you're\n            done waiting on the panel, poll\n            get_validation_upload_status(upload_session_id) yourself,\n            silently, until it reports settled: true — do not wait for a\n            chat message from the panel, some hosts refuse to let it send\n            one. On a host that can't render the panel, the message instead\n            points at prepare_validation_asset_upload.\n            Next: once settled, pass its assets to validate_asset as\n            assets: [{source: \"blob\", asset_id, media_type, asset_name}, ...].\n            ",
+        "description": "Open an inline panel to upload LOCAL creative files for Brand Intelligence\n            brand-compliance validation\n            (drag-and-drop, multiple files — they'll all validate together in\n            one bulk invocation). DEFAULT to this whenever the user hasn't\n            given an asset yet — no URL, no path, no attachment in their\n            message, even a bare \"validate this\" — open the panel\n            immediately rather than asking a text question first. If they\n            already gave a concrete local path, call\n            prepare_validation_asset_upload directly instead — do not open\n            this panel just to ask the user to re-drag a file whose path\n            they already gave you. Never ask the user to paste asset JSON\n            themselves.\n\n            Inputs: none.\n            Returns: opens the panel; on a host that can't render it, returns\n            instructions to use prepare_validation_asset_upload instead. The\n            panel reports back what it staged itself once uploads finish —\n            some hosts may need one more message from you before you see it.\n            Next: after upload, pass the returned asset_id(s) to\n            validate_asset as assets: [{source: \"blob\", asset_id, media_type,\n            asset_name}, ...].\n            ",
         "requestBody": {
           "required": true,
           "content": {
@@ -289,23 +286,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "``upload_session_id`` is what the model polls\n``get_validation_upload_status`` with — the panel tags every file it\nstages with this same id, so the model never has to wait on a host-pushed\nchat turn to learn what was uploaded.",
-                  "properties": {
-                    "message": {
-                      "title": "Message",
-                      "type": "string"
-                    },
-                    "upload_session_id": {
-                      "title": "Upload Session Id",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "upload_session_id"
-                  ],
-                  "title": "OpenValidationAssetUploadResult",
-                  "type": "object"
+                  "type": "string",
+                  "description": "Plain-text message; this tool returns no structured result."
                 }
               }
             }
@@ -399,7 +381,7 @@
       "post": {
         "operationId": "validate_asset",
         "summary": "Start a Validate (Adobe Brand Intelligence) brand-",
-        "description": "Start a Validate (Adobe Brand Intelligence) brand-\n            compliance validation invocation for one or more creative assets.\n\n            Bulk by design: pass every asset the user wants checked in ONE\n            call's assets list — never call this once per asset. Use\n            get_validation_options first if the asset input shape is unfamiliar.\n\n            Inputs: a ValidateAssetRequest — assets: a list of one or more,\n            each one of {source: \"web\", media_type, value, asset_name} for a URL\n            that renders as a page (not a direct-file or presigned URL — those\n            force a download and fail; use \"blob\" for those instead), or\n            {source: \"blob\", asset_id, media_type, asset_name} for a file staged via\n            prepare_validation_asset_upload / open_validation_asset_upload /\n            upload_validation_asset_bytes. Optional campaign_id — omit it\n            unless the user has one to give you; if the tenant requires an\n            explicit one, the call fails with a clear error naming what's\n            missing rather than guessing.\n            Returns: invocation_id and item_count.\n            Next: automatically poll get_validation_status yourself,\n            repeatedly and silently, until the invocation's status is\n            completed or failed — do not narrate each check in the chat.\n            \"Poll\" means call get_validation_status again yourself, each\n            time — never a shell command, sleep loop, or reading a cached\n            tool-result file off disk; none of those re-run the tool, so\n            none of them can ever see a status change. Some hosts also draw\n            a progress panel; it is a decorative visual for the user and\n            hands you nothing, so never wait on it instead of polling. Once\n            terminal, call get_validation_result exactly once for the full\n            per-item report, then stop — do not poll again for this\n            invocation afterward.\n            ",
+        "description": "Start a Validate (Adobe Brand Intelligence) brand-\n            compliance validation invocation for one or more creative assets.\n\n            Bulk by design: pass every asset the user wants checked in ONE\n            call's assets list — never call this once per asset. Use\n            get_validation_options first if the asset input shape is unfamiliar.\n\n            Inputs: a ValidateAssetRequest — assets: a list of one or more,\n            each one of {source: \"web\", media_type, value, asset_name} for a public\n            or presigned URL, or\n            {source: \"blob\", asset_id, media_type, asset_name} for a file staged via\n            prepare_validation_asset_upload / open_validation_asset_upload /\n            upload_validation_asset_bytes. Optional campaign_id — omit it\n            unless the user has one to give you; if the tenant requires an\n            explicit one, the call fails with a clear error naming what's\n            missing rather than guessing.\n            Returns: invocation_id and item_count.\n            Next: automatically poll get_validation_status yourself,\n            repeatedly and silently, until the invocation's status is\n            completed or failed — do not narrate each check in the chat.\n            \"Poll\" means call get_validation_status again yourself, each\n            time — never a shell command, sleep loop, or reading a cached\n            tool-result file off disk; none of those re-run the tool, so\n            none of them can ever see a status change. Some hosts also draw\n            a progress panel; it is a decorative visual for the user and\n            hands you nothing, so never wait on it instead of polling. Once\n            terminal, call get_validation_result exactly once for the full\n            per-item report, then stop — do not poll again for this\n            invocation afterward.\n            ",
         "requestBody": {
           "required": true,
           "content": {
@@ -631,18 +613,6 @@
             ],
             "default": null,
             "title": "Asset Url"
-          },
-          "asset_data_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Asset Data Url"
           }
         },
         "required": [
@@ -741,7 +711,7 @@
         "type": "object"
       },
       "ValidationItemStatus": {
-        "description": "One item's cheap status summary — no violations, no full-resolution\nimage. ``thumbnail_url`` is a small preview only, already present on the\nraw item-summary response at no extra cost. ``thumbnail_data_url`` is\nthat same thumbnail fetched server-side and embedded as a data URL, same\ntrick as get_validation_result's ``asset_data_url`` — a plain remote\n``thumbnail_url`` gets blocked by the panel's iframe CSP the same way, so\nthe panel prefers this field and falls back to a glyph placeholder only\nwhen it's None (fetch failed, oversize, or not an image). The full-\nresolution asset (rendition preferred) is still get_validation_result's\njob — this is thumbnail-sized only.",
+        "description": "One item's cheap status summary — no violations, no full-resolution\nimage. ``thumbnail_url`` is a small preview only, already present on the\nraw item-summary response at no extra cost — the panel's CSP allowlists\nValidate's temp-asset storage origins, so it loads this URL directly\nvia ``<img src>``, falling back to a glyph placeholder when it's None.\nThe full-resolution asset (rendition preferred) is still\nget_validation_result's job — this is thumbnail-sized only.",
         "properties": {
           "item_id": {
             "title": "Item Id",
@@ -774,18 +744,6 @@
             ],
             "default": null,
             "title": "Thumbnail Url"
-          },
-          "thumbnail_data_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Thumbnail Data Url"
           }
         },
         "required": [
@@ -796,30 +754,6 @@
           "violation_count"
         ],
         "title": "ValidationItemStatus",
-        "type": "object"
-      },
-      "StagedUploadAssetSummary": {
-        "description": "One file staged through the upload panel — the exact shape\n``validate_asset`` expects for a ``source: \"blob\"`` asset entry.",
-        "properties": {
-          "asset_id": {
-            "title": "Asset Id",
-            "type": "string"
-          },
-          "media_type": {
-            "title": "Media Type",
-            "type": "string"
-          },
-          "asset_name": {
-            "title": "Asset Name",
-            "type": "string"
-          }
-        },
-        "required": [
-          "asset_id",
-          "media_type",
-          "asset_name"
-        ],
-        "title": "StagedUploadAssetSummary",
         "type": "object"
       },
       "BlobAssetInput": {
@@ -912,7 +846,7 @@
       },
       "WebAssetInput": {
         "additionalProperties": false,
-        "description": "A public URL that renders as a page — Brand Intelligence fetches and screenshots it via headless browser. Not for a direct-file or presigned URL (e.g. an image/PDF link, or a get_download_url result): those force a download and fail. Use BlobAssetInput for those instead.",
+        "description": "A public or presigned http(s) URL the backend fetches directly.",
         "properties": {
           "source": {
             "const": "web",
