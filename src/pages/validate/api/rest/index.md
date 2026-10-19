@@ -1,6 +1,6 @@
 ---
 title: Adobe Brand Intelligence API Reference
-description: This is the API reference documentation for Abode's Brand Intelligence API
+description: REST API reference for Adobe Brand Intelligence at https://brand-intelligence.adobe.com.
 layout: none
 hideBreadcrumbNav: true
 ---

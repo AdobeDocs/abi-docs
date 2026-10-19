@@ -19,14 +19,14 @@ Create a new environment in Postman with the following variables:
 
 | Variable | Initial value | Description |
 |----------|---------------|-------------|
-| `base_url` | `https://abi-mw.adobe.io` | Brand Intelligence API base URL |
+| `base_url` | `https://brand-intelligence.adobe.com` | Brand Intelligence API base URL |
 | `ims_url` | `https://ims-na1.adobelogin.com` | Adobe IMS token endpoint base URL |
 | `client_id` | *(your Client ID)* | From Adobe Developer Console |
 | `client_secret` | *(your Client Secret)* | From Adobe Developer Console - mark as **secret** |
 | `access_token` | *(leave blank)* | Populated automatically in Step 2 |
-| `tenant_id` | *(your Tenant ID)* | Required on every invocation |
-| `item_id` | *(leave blank)* | Populated in Step 4 for each uploaded asset |
+| `upload_id` | *(leave blank)* | Populated in Step 4 for each uploaded asset |
 | `invocation_id` | *(leave blank)* | Populated as you work through invocations |
+| `item_id` | *(leave blank)* | Returned by the results endpoint in Step 6 |
 
 <InlineAlert variant="warning" slots="text"/>
 
@@ -69,23 +69,24 @@ You can import the Brand Intelligence OpenAPI spec directly into Postman to auto
 4. Set the collection's **Authorization** to **Bearer Token** and set the token value to `{{access_token}}`.
 
 
-## Step 4 - Upload your asset
+For imported requests, also check the generated `authorization` header: set its value to `Bearer {{access_token}}` or remove it so the collection authorization supplies the header. Do not leave a generated placeholder that overrides your token.
 
-Brand Intelligence validates assets that live in its own storage - upload each asset first and reference it by the returned `itemId` when you submit the invocation.
+
+## Step 4 - Discover context and upload your asset
+
+Tenant and permissions are resolved from your token. Send **GET** `{{base_url}}/index` with Bearer Token authorization to discover your tenant's ID and name. You do not send a `tenantId` in upload or validation bodies.
+
+Send **GET** `{{base_url}}/campaigns?skill=validate` with the same authorization to list validation campaigns. Each entry in `items` includes an `id` you can use as the optional `campaignId` in Step 5. When `page.next` is present and non-null, pass it as the `start` query parameter to fetch the next page.
+
+Brand Intelligence validates uploaded assets only. Upload each asset first and reference it by the returned `uploadId` when you submit the invocation.
 
 **Request an upload slot.** Create a **POST** request:
 
-- **URL:** `{{base_url}}/api/abi/storage/temp`
+- **URL:** `{{base_url}}/storage/temp`
 - **Authorization:** Bearer Token → `{{access_token}}`
-- **Body** (raw JSON):
+- **Body:** none
 
-```json
-{
-  "tenantId": "{{tenant_id}}"
-}
-```
-
-The response (`201 Created`) includes an `itemId` and an `uploadUrl`. Copy the `itemId` into your `item_id` environment variable.
+The response (`201 Created`) includes an `uploadId`, an `uploadUrl`, and `uploadUrlExpiresAt`. Copy the `uploadId` into your `upload_id` environment variable.
 
 **Upload the bytes.** Create a **PUT** request:
 
@@ -98,25 +99,24 @@ The response (`201 Created`) includes an `itemId` and an `uploadUrl`. Copy the `
 
 <InlineAlert variant="info" slots="text"/>
 
-Assets already reachable on the public web don't need this step - set `itemSource` to `web` and `sourceRef` to the asset URL in Step 5 instead.
+The REST validation endpoint accepts only `itemSource: "upload"`. Public asset URLs and the old `blob` and `web` source values are not supported.
 
 
 ## Step 5 - Submit a validation invocation
 
 Create a **POST** request:
 
-- **URL:** `{{base_url}}/api/abi/skills/ra`
+- **URL:** `{{base_url}}/skills/validate`
 - **Authorization:** Bearer Token → `{{access_token}}`
 - **Body** (raw JSON):
 
 ```json
 {
-  "tenantId": "{{tenant_id}}",
   "displayName": "My first validation invocation",
   "items": [
     {
-      "itemSource": "blob",
-      "sourceRef": "{{item_id}}",
+      "itemSource": "upload",
+      "sourceRef": "{{upload_id}}",
       "mediaType": "image/png",
       "itemName": "asset-01"
     }
@@ -124,23 +124,27 @@ Create a **POST** request:
 }
 ```
 
-For an uploaded asset, `itemSource` is `blob` and `sourceRef` is the `itemId` from Step 4. For a public URL, use `"itemSource": "web"` and `"sourceRef": "<asset URL>"`.
+Set `itemSource` to `upload` and `sourceRef` to the `uploadId` from Step 4. You can optionally include `campaignId` from the campaign list or a `validationContext` such as `{"dimensions": {"market": ["us"]}}` at the invocation or item level.
 
-The response includes an `invocationId`. Copy it into your `invocation_id` environment variable.
+The response (`202 Accepted`) includes an `invocationId` and `skill: "validate"`. Copy the `invocationId` into your `invocation_id` environment variable.
 
 
 ## Step 6 - Poll and retrieve results
 
 **Poll invocation status:**
 
-- **GET** `{{base_url}}/api/abi/skills/ra/{{invocation_id}}`
+- **GET** `{{base_url}}/skills/validate/{{invocation_id}}`
 - **Authorization:** Bearer Token → `{{access_token}}`
 
 Repeat until `status` is `completed`, `failed`, or `cancelled`.
 
 **Fetch results:**
 
-- **GET** `{{base_url}}/api/abi/skills/ra/{{invocation_id}}/items`
+- **GET** `{{base_url}}/skills/validate/{{invocation_id}}/items`
 - **Authorization:** Bearer Token → `{{access_token}}`
 
-See the [Using curl](../using-curl/index.md) for annotated example responses.
+Copy an item's returned `itemId` into `item_id`, then fetch its full detail with **GET** `{{base_url}}/skills/validate/{{invocation_id}}/items/{{item_id}}` using the same authorization. The detail includes `result.violations`, `result.passes`, and `result.rejections`. The result `itemId` is not the temporary `uploadId`.
+
+To list your previous validation invocations, use **GET** `{{base_url}}/skills/invocations?skill=validate`. The `skill` query parameter is required. Use `page.next` as `start` to fetch more pages until it is absent or `null`.
+
+See [Using curl](../using-curl/index.md) for annotated example responses and [Review Feedback](../review-feedback/index.md) for versioned feedback updates.

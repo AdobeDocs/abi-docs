@@ -9,17 +9,17 @@ After a validation invocation completes, reviewers can attach structured feedbac
 
 ## Overview
 
-Each validation finding (`RaItemViolation`) on a completed item is either:
+Each validation finding (`ValidateItemViolation`) on a completed item is either:
 
 - `system` - generated automatically by the validation pipeline. You cannot create these via the API, but you can review them.
 - `user` - created by your application on behalf of a human reviewer. These can be created and edited.
 
-Violations sit at the **item** level under the `skills/ra` resource hierarchy:
+The REST API base URL is `https://brand-intelligence.adobe.com`. Violations sit at the **item** level under the `skills/validate` resource hierarchy:
 
 ```
-GET    /api/abi/skills/ra/{si_id}/items/{item_id}          → item detail incl. violations
-POST   /api/abi/skills/ra/{si_id}/items/{item_id}/violations
-PATCH  /api/abi/skills/ra/{si_id}/items/{item_id}/violations/{violation_id}
+GET    /skills/validate/{invocation_id}/items/{item_id} → item detail incl. violations
+POST   /skills/validate/{invocation_id}/items/{item_id}/violations
+PATCH  /skills/validate/{invocation_id}/items/{item_id}/violations/{violation_id}
 ```
 
 <InlineAlert variant="info" slots="text"/>
@@ -33,7 +33,7 @@ Violations aren't listed on their own endpoint - fetch the item detail, which in
 
 ```bash
 curl --request GET \
-  --url "https://abi-mw.adobe.io/api/abi/skills/ra/$INVOCATION_ID/items/$ITEM_ID" \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID" \
   --header "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
@@ -51,7 +51,7 @@ curl --request GET \
     "summaryText": "The asset violates 1 brand guideline.",
     "violations": [
       {
-        "violationId": "v-0001",
+        "violationId": "123e4567-e89b-12d3-a456-426614174002",
         "violationSource": "system",
         "violationSummary": "Logo clear space violation detected.",
         "assetAttributions": [],
@@ -62,12 +62,14 @@ curl --request GET \
         "userName": null,
         "recordVersion": 1
       }
-    ]
+    ],
+    "passes": [],
+    "rejections": []
   }
 }
 ```
 
-Each violation may also include `assetAttributions` and `corpusAttributions` linking back to the specific regions in the asset and the guideline chunks that informed the finding. `reviewStatus` is `null` until a reviewer accepts or rejects the violation. See the [API Reference](../api/rest/index.md) for the full `RaItemViolation` schema.
+Each violation may also include `assetAttributions` and `corpusAttributions` linking back to the specific regions in the asset and the guideline chunks that informed the finding. `reviewStatus` is `null` until a reviewer accepts or rejects the violation. The result also includes `passes` and `rejections` lists with the same finding schema. See the [API Reference](../api/rest/index.md) for the full `ValidateItemViolation` schema.
 
 
 ## Add a violation
@@ -76,37 +78,59 @@ Create a user-authored violation on a completed item.
 
 ```bash
 curl --request POST \
-  --url "https://abi-mw.adobe.io/api/abi/skills/ra/$INVOCATION_ID/items/$ITEM_ID/violations" \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID/violations" \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
   --header 'Content-Type: application/json' \
   --data '{
-    "violationSummary": "Logo clear space is insufficient on mobile breakpoint.",
-    "userName": "Jane Smith"
+    "violationSummary": "Logo clear space is insufficient on mobile breakpoint."
   }'
 ```
 
 | Field | Required | Description |
 |-------|----------|-------------|
 | `violationSummary` | Yes | Description of the finding (1–2048 characters). |
-| `userName` | Yes | Display name of the reviewer creating this violation. |
 
-**Response** (`201 Created`): the created violation object with `violationSource: user`.
+Do not include `userName`; it is not part of the create request schema.
+
+**Response** (`201 Created`): the created violation object with `violationSource: user` and a `recordVersion`.
 
 
 ## Update a violation
 
-Apply a feedback action to an existing violation using `PATCH`. The `action` field selects which of three shapes the rest of the body follows.
+Apply a feedback action to an existing violation using `PATCH`. The `action` field selects one of four request shapes: `acceptViolation`, `rejectViolation`, `resetViolation`, or `editViolation`.
 
-### Accept or reject a violation
+Every update requires an `If-Match` header containing the violation's current version as a quoted string. Read `recordVersion` from the item detail or the created violation:
 
 ```bash
-curl --request PATCH \
-  --url "https://abi-mw.adobe.io/api/abi/skills/ra/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
+export VIOLATION_ID=123e4567-e89b-12d3-a456-426614174002
+export RECORD_VERSION=1
+```
+
+All update examples below use that version. Each successful update returns **`204 No Content`**, not a JSON body. Use `--include` to see the response headers, then update `RECORD_VERSION` to the version in `ETag` (for example, `ETag: "2"` means `export RECORD_VERSION=2`) before another update. If another reviewer has changed the finding, fetch the current item detail and reconcile the change before retrying with its version.
+
+### Accept a violation
+
+```bash
+curl --include --request PATCH \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "If-Match: \"$RECORD_VERSION\"" \
   --header 'Content-Type: application/json' \
   --data '{
-    "action": "setReviewStatus",
-    "reviewStatus": "rejected",
+    "action": "acceptViolation"
+  }'
+```
+
+### Reject a violation
+
+```bash
+curl --include --request PATCH \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
+  --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "If-Match: \"$RECORD_VERSION\"" \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "action": "rejectViolation",
     "rejectionReason": "incorrectAssessment",
     "rejectionDetails": "The logo spacing meets the updated brand guidelines v2.1."
   }'
@@ -114,18 +138,18 @@ curl --request PATCH \
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `reviewStatus` | Yes | `accepted` or `rejected`. |
 | `rejectionReason` | No | One of `incorrectAssessment`, `notApplicable`. Only meaningful when rejecting. |
-| `rejectionDetails` | No | Free-text elaboration on the rejection (1–2048 characters). |
+| `rejectionDetails` | Yes | Free-text elaboration on the rejection (1–2048 characters). |
 
 ### Reset a violation
 
 Clear a violation's feedback back to pending (un-accept / un-reject):
 
 ```bash
-curl --request PATCH \
-  --url "https://abi-mw.adobe.io/api/abi/skills/ra/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
+curl --include --request PATCH \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "If-Match: \"$RECORD_VERSION\"" \
   --header 'Content-Type: application/json' \
   --data '{
     "action": "resetViolation"
@@ -137,9 +161,10 @@ curl --request PATCH \
 Update the summary text of a violation:
 
 ```bash
-curl --request PATCH \
-  --url "https://abi-mw.adobe.io/api/abi/skills/ra/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
+curl --include --request PATCH \
+  --url "https://brand-intelligence.adobe.com/skills/validate/$INVOCATION_ID/items/$ITEM_ID/violations/$VIOLATION_ID" \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "If-Match: \"$RECORD_VERSION\"" \
   --header 'Content-Type: application/json' \
   --data '{
     "action": "editViolation",
