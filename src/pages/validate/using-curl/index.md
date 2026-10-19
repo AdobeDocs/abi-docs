@@ -19,18 +19,9 @@ This guide walks you through the complete validation flow - from getting an acce
 
 The Brand Intelligence API is asynchronous. You submit an invocation, receive an `invocationId`, poll until the invocation completes, then fetch per-asset results.
 
-All REST API requests use `https://brand-intelligence.adobe.com`:
+All REST API requests use `https://brand-intelligence.adobe.com`.
 
-```text
-Application → Adobe IMS: POST /ims/token/v3 → access_token
-For each asset:
-  Application → Brand Intelligence: POST /storage/temp → uploadId, uploadUrl
-  Application → Storage: PUT uploadUrl (asset bytes)
-Application → Brand Intelligence: POST /skills/validate → invocationId
-Application → Brand Intelligence: GET /skills/validate/{invocation_id} (poll)
-Application → Brand Intelligence: GET /skills/validate/{invocation_id}/items
-Application → Brand Intelligence: GET /skills/validate/{invocation_id}/items/{item_id}
-```
+![Brand Intelligence Sequence Diagram](images/abi-flow.png)
 
 ## Step 1 - Get an access token
 
