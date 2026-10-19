@@ -53,7 +53,7 @@ Adobe Brand Intelligence APIs are listed under the **Adobe Firefly Services** ca
 
 Select the **OAuth Server-to-Server** credential type. Give your credential a meaningful name and select **Next**.
 
-![image](images/oath.png "Console")
+![image](images/oauth.png "Console")
 
 Your new credential is now listed in the project.
 
@@ -68,8 +68,8 @@ Select the credential to view its details, including your **Client ID** and **Cl
 With your credentials in hand, request a token from Adobe IMS:
 
 ```bash
-export CLIENT_ID=<your_client_id>
-export CLIENT_SECRET=<your_client_secret>
+export CLIENT_ID='<your_client_id>'
+export CLIENT_SECRET='<your_client_secret>'
 
 curl --location 'https://ims-na1.adobelogin.com/ims/token/v3' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -92,14 +92,14 @@ curl --location 'https://ims-na1.adobelogin.com/ims/token/v3' \
 Export the token for use in subsequent requests:
 
 ```bash
-export ACCESS_TOKEN=<access_token_from_response>
+export ACCESS_TOKEN='<access_token_from_response>'
 ```
 
 Tokens are valid for 24 hours (`expires_in: 86399` seconds). Implement a refresh mechanism to request a new token before the current one expires.
 
 ## Make authenticated requests
 
-Include the token in every Brand Intelligence API request:
+The REST API base URL is `https://brand-intelligence.adobe.com`. Include the token in every Brand Intelligence API request:
 
 ```bash
 --header "Authorization: Bearer $ACCESS_TOKEN"

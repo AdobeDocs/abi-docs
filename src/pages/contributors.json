@@ -1,7 +1,7 @@
 {
-  "total": 24,
+  "total": 16,
   "offset": 0,
-  "limit": 24,
+  "limit": 16,
   "data": [
     {
       "page": "/",
@@ -14,22 +14,6 @@
       "lastUpdated": "10/6/2026"
     },
     {
-      "page": "/api/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/195011431?v=4",
-        "https://avatars.githubusercontent.com/u/41382203?v=4"
-      ],
-      "lastUpdated": "8/31/2026"
-    },
-    {
-      "page": "/api/mcp/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/6939065?v=4",
-        "https://avatars.githubusercontent.com/u/15341452?v=4"
-      ],
-      "lastUpdated": "9/30/2026"
-    },
-    {
       "page": "/config",
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4",
@@ -37,51 +21,6 @@
         "https://avatars.githubusercontent.com/u/6939065?v=4",
         "https://avatars.githubusercontent.com/u/195011431?v=4",
         "https://avatars.githubusercontent.com/u/41382203?v=4"
-      ],
-      "lastUpdated": "10/6/2026"
-    },
-    {
-      "page": "/guides/authentication/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/6939065?v=4"
-      ],
-      "lastUpdated": "9/1/2026"
-    },
-    {
-      "page": "/guides/core-concepts/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/6939065?v=4"
-      ],
-      "lastUpdated": "9/30/2026"
-    },
-    {
-      "page": "/guides/mcp-integration/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/16955521?v=4",
-        "https://avatars.githubusercontent.com/u/6939065?v=4",
-        "https://avatars.githubusercontent.com/u/15341452?v=4"
-      ],
-      "lastUpdated": "10/6/2026"
-    },
-    {
-      "page": "/guides/quickstart/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/6939065?v=4"
-      ],
-      "lastUpdated": "9/30/2026"
-    },
-    {
-      "page": "/guides/review-feedback/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/6939065?v=4"
-      ],
-      "lastUpdated": "9/1/2026"
-    },
-    {
-      "page": "/guides/using-postman/",
-      "avatars": [
-        "https://avatars.githubusercontent.com/u/16955521?v=4",
-        "https://avatars.githubusercontent.com/u/6939065?v=4"
       ],
       "lastUpdated": "10/6/2026"
     },
@@ -140,35 +79,35 @@
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     },
     {
       "page": "/validate/authentication/",
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     },
     {
       "page": "/validate/core-concepts/",
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     },
     {
       "page": "/validate/review-feedback/",
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     },
     {
       "page": "/validate/using-curl/",
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     },
     {
       "page": "/validate/using-mcp/",
@@ -182,7 +121,7 @@
       "avatars": [
         "https://avatars.githubusercontent.com/u/16955521?v=4"
       ],
-      "lastUpdated": "10/6/2026"
+      "lastUpdated": "10/19/2026"
     }
   ],
   ":type": "sheet"
