@@ -28,20 +28,36 @@ This guide is for teams integrating **Adobe Brand Intelligence Validate** into t
      `Authorization: Bearer <token>` on every MCP request; the server
      independently validates it against IMS on every call.
 
-- **Example config** (e.g. for Claude Desktop or any MCP-compatible host):
+- **Claude Desktop:** add a [remote custom connector](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp)
+  with `https://abi-mcp.adobe.io/mcp` as the server URL, then complete the
+  browser sign-in. If prompted to choose an OAuth client, select **Register
+  automatically** to use Dynamic Client Registration. Follow the linked
+  guide for plan and organization permissions. Remote custom connectors
+  connect from Anthropic's cloud, so the server must be reachable from
+  that network. The OAuth broker must also accept Claude's hosted callback
+  URL, `https://claude.ai/api/mcp/auth_callback`, for this path.
+
+- **Hosts that require a local stdio connection:** use the `mcp-remote`
+  bridge. This path requires Node.js. For Claude Desktop's local MCP
+  configuration, merge the following into `claude_desktop_config.json`:
 
   ```json
-  "mcpServers": {
-    "abi-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://abi-mcp.adobe.io/mcp"
-      ]
+  {
+    "mcpServers": {
+      "abi-mcp": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "mcp-remote@0.16.0",
+          "https://abi-mcp.adobe.io/mcp"
+        ]
+      }
     }
   }
   ```
+
+  The explicit package version avoids automatically selecting a newer
+  bridge release. Review release changes before updating it.
 
 - **Tool discovery:** send a standard MCP `initialize` + `tools/list` — every
   tool's name, description, and JSON Schema come back from the server
